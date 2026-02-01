@@ -32,7 +32,7 @@ const EMIDetailsScreen = ({ navigation }) => {
               <View style={styles.needsCardHeader}>
                 <View>
                   <Text style={styles.emiTitle}>
-                    EMI <Text style={styles.dueTitleOrange}>due in 3 day(s)</Text>
+                    EMI <Text style={styles.dueTitleOrange}>Overdue(s)</Text>
                   </Text>
                   <Text style={styles.emiSubtitle}>
                     your autopay setup will take care of{'\n'}
@@ -49,7 +49,7 @@ const EMIDetailsScreen = ({ navigation }) => {
             <View style={styles.needsCardBottom}>
               <Text style={styles.amount}>₹5,121</Text>
               <Text style={styles.accountDetails}>
-                Sandeep singh 103680 • EMI 18 of 24
+                Sandeep singh 103680 • EMI 13 of 24
               </Text>
 
               <View style={styles.buttonRow}>
@@ -78,7 +78,7 @@ const EMIDetailsScreen = ({ navigation }) => {
               <View style={styles.progressRingOuter} />
               <View style={styles.progressCenter}>
                 <MaterialCommunityIcons name="shield-check" size={32} color="#00ff88" />
-                <Text style={styles.progressPercentage}>67%</Text>
+                <Text style={styles.progressPercentage}>60%</Text>
                 <Text style={styles.progressLabel}>paid</Text>
               </View>
             </View>

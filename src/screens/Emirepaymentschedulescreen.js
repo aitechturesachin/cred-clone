@@ -103,14 +103,14 @@ const EMI_SCHEDULE = [
   },
   {
     date: "02 jan '26",
-    status: "due in 1 days",
+    status: "Overdue",
     statusType: "due",
     amount: "₹5,121",
   },
 
   {
     date: "02 feb '26",
-    status: "due in 29 days",
+    status: "due in 28 days",
     statusType: "due",
     amount: "₹5,121",
   },

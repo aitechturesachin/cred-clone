@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
+  Image,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -100,7 +101,7 @@ const LoanDetailsScreen = ({ navigation }) => {
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
             <View style={styles.progressInfo}>
-              <Text style={styles.progressPercentage}>67%</Text>
+              <Text style={styles.progressPercentage}>60%</Text>
               <View style={styles.progressLabels}>
                 <Text style={styles.progressLabel}>paid</Text>
                 <Text style={styles.progressLabel}>till date</Text>
@@ -112,7 +113,7 @@ const LoanDetailsScreen = ({ navigation }) => {
           {/* Progress Bar */}
           <View style={styles.progressBarContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressBarFill, { width: '67%' }]} />
+              <View style={[styles.progressBarFill, { width: '60%' }]} />
             </View>
           </View>
 
@@ -400,12 +401,28 @@ const LoanDetailsScreen = ({ navigation }) => {
                   <Text style={styles.paySheetViewAll}>View all</Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.paySheetMethodRow}>
-                <View style={styles.gpayLogoPlaceholder}>
-                  <Text style={styles.gpayLogoText}>G</Text>
-                </View>
+                 <View style={styles.paySheetMethodRow}>
+                <Image
+                  source={require('../../assets/id0cwZB6-t_1769970753412.png')}
+                  style={styles.paySheetMethodLogo}
+                  resizeMode="contain"
+                />
                 <View style={styles.paySheetMethodInfo}>
-                  {/* <Text style={styles.paySheetMethodType}>upi app</Text> */}
+                  <Text style={styles.paySheetMethodType}>upi</Text>
+                  <Text style={styles.paySheetMethodName}>Icici Bank XX6667</Text>
+                </View>
+                <View style={styles.paySheetMethodRadio}>
+                  <View style={styles.paySheetMethodRadioInner} />
+                </View>
+              </View>
+              <View style={styles.paySheetMethodRow}>
+                <Image
+                  source={require('../../assets/icons8-google-pay-48.png')}
+                  style={styles.gpayLogoImage}
+                  resizeMode="contain"
+                />
+                <View style={styles.paySheetMethodInfo}>
+                  <Text style={styles.paySheetMethodType}>upi app</Text>
                   <Text style={styles.paySheetMethodName}>GPay</Text>
                 </View>
                 <View style={styles.paySheetMethodRadio}>
@@ -1018,6 +1035,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
   },
+  paySheetMethodLogo: {
+    width: 40,
+    height: 40,
+    marginRight: 14,
+  },
   gpayLogoPlaceholder: {
     width: 40,
     height: 40,
@@ -1025,6 +1047,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#4285F4',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 14,
+  },
+  gpayLogoImage: {
+    width: 40,
+    height: 40,
     marginRight: 14,
   },
   gpayLogoText: {
