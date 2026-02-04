@@ -101,16 +101,17 @@ const EMI_SCHEDULE = [
     overdueCharges: "₹2,417.63",
     amount: "₹7,538.63",
   },
+
   {
-    date: "02 jan '26",
-    status: "Overdue",
-    statusType: "due",
-    amount: "₹5,121",
+    date: "02 dec '25",
+    statusType: "overdue",
+    overdueCharges: "₹40",
+    amount: "₹5,201.63",
   },
 
   {
     date: "02 feb '26",
-    status: "due in 28 days",
+    status: "due in 27 days",
     statusType: "due",
     amount: "₹5,121",
   },
@@ -201,11 +202,22 @@ const EMIRepaymentScheduleScreen = ({ navigation }) => {
                 <Text style={styles.emiDate}>{item.date}</Text>
                 {item.statusType === "overdue" ? (
                   <Text style={styles.emiStatus}>
-                    <Text style={[styles.emiStatus, { color: getStatusColor("overdue") }]}>
+                    <Text
+                      style={[
+                        styles.emiStatus,
+                        { color: getStatusColor("overdue") },
+                      ]}
+                    >
                       Overdue
                     </Text>
-                    <Text style={[styles.emiStatus, { color: OVERDUE_CHARGES_COLOR }]}>
-                      {" "}charges applied + {item.overdueCharges}
+                    <Text
+                      style={[
+                        styles.emiStatus,
+                        { color: OVERDUE_CHARGES_COLOR },
+                      ]}
+                    >
+                      {" "}
+                      charges applied + {item.overdueCharges}
                     </Text>
                   </Text>
                 ) : (

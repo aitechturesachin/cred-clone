@@ -415,15 +415,16 @@ const LoanDetailsScreen = ({ navigation }) => {
                   <View style={styles.paySheetMethodRadioInner} />
                 </View>
               </View>
+              
               <View style={styles.paySheetMethodRow}>
                 <Image
-                  source={require('../../assets/icons8-google-pay-48.png')}
+                  source={require('../../assets/pngegg.png')}
                   style={styles.gpayLogoImage}
                   resizeMode="contain"
                 />
                 <View style={styles.paySheetMethodInfo}>
                   <Text style={styles.paySheetMethodType}>upi app</Text>
-                  <Text style={styles.paySheetMethodName}>GPay</Text>
+                  <Text style={styles.paySheetMethodName}>kotak bank XX6667</Text>
                 </View>
                 <View style={styles.paySheetMethodRadio}>
                   <View style={styles.paySheetMethodRadioInner} />
