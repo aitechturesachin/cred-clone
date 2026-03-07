@@ -389,7 +389,7 @@ const LoanDetailsScreen = ({ navigation }) => {
               </View>
               <View style={styles.paySheetForeclosureInfo}>
                 <Text style={styles.paySheetForeclosureLabel}>LOAN FORECLOSURE</Text>
-                <Text style={styles.paySheetForeclosureAmount}>₹69,589.99</Text>
+                <Text style={styles.paySheetForeclosureAmount}>₹64468.99</Text>
               </View>
             </View>
 
@@ -437,7 +437,7 @@ const LoanDetailsScreen = ({ navigation }) => {
               <View style={styles.paySheetNetPayable}>
                 <Text style={styles.paySheetNetLabel}>net payable</Text>
                 <View style={styles.paySheetNetRow}>
-                  <Text style={styles.paySheetNetAmount}>₹69,589.99</Text>
+                  <Text style={styles.paySheetNetAmount}>₹64468.99</Text>
                   <Ionicons name="chevron-forward" size={18} color="#666" />
                 </View>
               </View>
