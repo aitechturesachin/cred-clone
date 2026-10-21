@@ -35,7 +35,53 @@ const getStatementPdfUri = async () => {
   return asset.localUri;
 };
 
-const DEFAULT_PAY_AMOUNT = '37,084';
+// Loan math: EMI 22 of 24, with 2 EMIs overdue → 20 EMIs actually paid
+const LOAN_AMOUNT = 103680;
+const EMI_AMOUNT = 5121;
+const TOTAL_EMIS = 24;
+const CURRENT_EMI = 22;
+const OVERDUE_EMI_COUNT = 2;
+const ANNUAL_RATE = 0.1699;
+const PAID_EMI_COUNT = CURRENT_EMI - OVERDUE_EMI_COUNT; // 20
+
+const formatAmount = (value, decimals = 2) =>
+  value.toLocaleString('en-IN', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+
+const getPrincipalLeftAfterPayments = (
+  loanAmount,
+  emiAmount,
+  annualRate,
+  paidCount
+) => {
+  const monthlyRate = annualRate / 12;
+  let balance = loanAmount;
+  for (let i = 0; i < paidCount; i += 1) {
+    const interest = Math.round(balance * monthlyRate * 100) / 100;
+    const principal = Math.min(emiAmount - interest, balance);
+    balance = Math.round((balance - principal) * 100) / 100;
+  }
+  return Math.max(0, balance);
+};
+
+const TOTAL_EMI_PAID = PAID_EMI_COUNT * EMI_AMOUNT; // ₹1,02,420.00
+const PRINCIPAL_LEFT = getPrincipalLeftAfterPayments(
+  LOAN_AMOUNT,
+  EMI_AMOUNT,
+  ANNUAL_RATE,
+  PAID_EMI_COUNT
+); // ₹19,904.25
+const OVERDUE_CHARGES = 10216.75;
+// Overdue pay total = principal left + overdue charges → ₹30,121.00
+const OVERDUE_PAY_AMOUNT = PRINCIPAL_LEFT + OVERDUE_CHARGES;
+// Amount paid shown = total EMI paid − principal left
+const AMOUNT_PAID = TOTAL_EMI_PAID - PRINCIPAL_LEFT; // ₹82,515.75
+const PERCENT_PAID = Math.round(
+  ((LOAN_AMOUNT - PRINCIPAL_LEFT) / LOAN_AMOUNT) * 100
+); // 81%
+const DEFAULT_PAY_AMOUNT = formatAmount(OVERDUE_PAY_AMOUNT); // ₹30,121.00
 
 const LoanDetailsScreen = ({ navigation, route }) => {
   const [showRepaymentModal, setShowRepaymentModal] = useState(false);
@@ -145,11 +191,23 @@ const LoanDetailsScreen = ({ navigation, route }) => {
         <View style={styles.amountCard}>
           <View style={styles.amountRow}>
             <View style={styles.amountItem}>
+              <MaterialCommunityIcons
+                name="bank-outline"
+                size={18}
+                color="#999"
+                style={styles.amountItemIcon}
+              />
               <Text style={styles.amountValue}>₹1,03,680</Text>
               <Text style={styles.amountLabel}>loan amount</Text>
             </View>
             <View style={styles.amountDivider} />
             <View style={styles.amountItem}>
+              <MaterialCommunityIcons
+                name="calendar-month-outline"
+                size={18}
+                color="#999"
+                style={styles.amountItemIcon}
+              />
               <Text style={styles.amountValue}>₹5,121</Text>
               <Text style={styles.amountLabel}>EMI amount</Text>
             </View>
@@ -184,10 +242,13 @@ const LoanDetailsScreen = ({ navigation, route }) => {
               <Text style={styles.autopayBank}>Icici Bank XX6667</Text>
             </View>
             <TouchableOpacity
+              style={styles.viewScheduleRow}
               onPress={() => navigation?.navigate('EmiRepaymentSchedule')}
               activeOpacity={0.8}
             >
+              <Ionicons name="calendar-outline" size={14} color="#00ff88" />
               <Text style={styles.viewSchedule}>View EMI schedule</Text>
+              <Ionicons name="chevron-forward" size={14} color="#00ff88" />
             </TouchableOpacity>
           </View>
         </View>
@@ -196,35 +257,65 @@ const LoanDetailsScreen = ({ navigation, route }) => {
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
             <View style={styles.progressInfo}>
-              <Text style={styles.progressPercentage}>80%</Text>
+              <Text style={styles.progressPercentage}>{PERCENT_PAID}%</Text>
               <View style={styles.progressLabels}>
                 <Text style={styles.progressLabel}>paid</Text>
                 <Text style={styles.progressLabel}>till date</Text>
               </View>
             </View>
-            <Text style={styles.onTrackBadge}>ON TRACK</Text>
+            <View style={styles.onTrackBadge}>
+              <Ionicons name="checkmark-circle" size={14} color="#00ff88" />
+              <Text style={styles.onTrackBadgeText}>ON TRACK</Text>
+            </View>
           </View>
           
           {/* Progress Bar */}
           <View style={styles.progressBarContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressBarFill, { width: '60%' }]} />
+              <View
+                style={[styles.progressBarFill, { width: `${PERCENT_PAID}%` }]}
+              />
             </View>
           </View>
 
-          {/* Payment Details */}
+          {/* Payment Details — based on 20 paid EMIs (2 overdue) */}
           <View style={styles.paymentDetails}>
             <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>amount paid</Text>
-              <Text style={styles.paymentValue}>₹69,076.53</Text>
+              <View style={styles.paymentLabelRow}>
+                <Ionicons name="checkmark-circle-outline" size={16} color="#999" />
+                <Text style={styles.paymentLabel}>amount paid</Text>
+              </View>
+              <Text style={styles.paymentValue}>₹{formatAmount(AMOUNT_PAID)}</Text>
             </View>
-            {/* <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>principal paid</Text>
-              <Text style={styles.paymentValue}>₹69,782.29</Text>
-            </View> */}
             <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>principal left</Text>
-              <Text style={styles.paymentValue}>₹37,084.99</Text>
+              <View style={styles.paymentLabelRow}>
+                <MaterialCommunityIcons name="cash-plus" size={16} color="#00ff88" />
+                <Text style={styles.paymentLabel}>principal left</Text>
+              </View>
+              <Text style={[styles.paymentValue, styles.paymentValueGreen]}>
+                ₹{formatAmount(PRINCIPAL_LEFT)}
+              </Text>
+            </View>
+            <View style={styles.paymentRow}>
+              <View style={styles.paymentLabelRow}>
+                <Ionicons name="alert-circle" size={16} color="#ff9500" />
+                <Text style={styles.paymentLabel}>overdue charges</Text>
+              </View>
+              <Text style={[styles.paymentValue, styles.paymentValueOrange]}>
+                ₹{formatAmount(OVERDUE_CHARGES)}
+              </Text>
+            </View>
+            <View style={[styles.paymentRow, styles.paymentRowTotal]}>
+              <View style={styles.paymentLabelRow}>
+                <Ionicons name="card-outline" size={18} color="#fff" />
+                <Text style={styles.paymentLabelTotal}>Pay now / total</Text>
+              </View>
+              <View style={styles.paymentValueTotalBadge}>
+                <Ionicons name="flash" size={16} color="#fff" style={{ marginRight: 4 }} />
+                <Text style={styles.paymentValueTotal}>
+                  ₹{formatAmount(OVERDUE_PAY_AMOUNT)}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -238,7 +329,10 @@ const LoanDetailsScreen = ({ navigation, route }) => {
           }}
           activeOpacity={0.8}
         >
-          <Text style={styles.payNowText}>Want to pay now?</Text>
+          <View style={styles.payNowCardLeft}>
+            <Ionicons name="flash" size={20} color="#1a1a1a" />
+            <Text style={styles.payNowText}>Want to pay now?</Text>
+          </View>
           <Ionicons name="arrow-forward" size={20} color="#1a1a1a" />
         </TouchableOpacity>
 
@@ -249,8 +343,10 @@ const LoanDetailsScreen = ({ navigation, route }) => {
             <Text style={styles.insuranceStatus}>
               is <Text style={styles.insuranceActive}>active</Text>
             </Text>
-            <TouchableOpacity style={styles.insurancePolicyLink}>
+            <TouchableOpacity style={styles.insurancePolicyLink} activeOpacity={0.8}>
+              <Ionicons name="document-text-outline" size={14} color="#00ff88" />
               <Text style={styles.insurancePolicyText}>View insurance policy</Text>
+              <Ionicons name="chevron-forward" size={14} color="#00ff88" />
             </TouchableOpacity>
           </View>
           <View style={styles.insuranceIconContainer}>
@@ -790,6 +886,9 @@ const styles = StyleSheet.create({
   amountItem: {
     flex: 1,
   },
+  amountItemIcon: {
+    marginBottom: 6,
+  },
   amountValue: {
     fontSize: 20,
     fontWeight: '700',
@@ -878,9 +977,15 @@ const styles = StyleSheet.create({
     color: '#999',
     marginLeft: 8,
   },
+  viewScheduleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
   viewSchedule: {
     fontSize: 13,
-    color: '#fff',
+    color: '#00ff88',
     textDecorationLine: 'underline',
   },
   progressSection: {
@@ -913,6 +1018,11 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   onTrackBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  onTrackBadgeText: {
     fontSize: 12,
     fontWeight: '700',
     color: '#00ff88',
@@ -940,6 +1050,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  paymentLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   paymentLabel: {
     fontSize: 14,
     color: '#999',
@@ -947,6 +1062,36 @@ const styles = StyleSheet.create({
   paymentValue: {
     fontSize: 15,
     fontWeight: '600',
+    color: '#fff',
+  },
+  paymentValueGreen: {
+    color: '#00ff88',
+  },
+  paymentValueOrange: {
+    color: '#ff9500',
+  },
+  paymentRowTotal: {
+    marginTop: 4,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
+  paymentLabelTotal: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  paymentValueTotalBadge: {
+    backgroundColor: '#c62828',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  paymentValueTotal: {
+    fontSize: 22,
+    fontWeight: '700',
     color: '#fff',
   },
   payNowCard: {
@@ -958,6 +1103,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  payNowCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   payNowText: {
     fontSize: 16,
@@ -993,10 +1143,13 @@ const styles = StyleSheet.create({
   },
   insurancePolicyLink: {
     marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   insurancePolicyText: {
     fontSize: 13,
-    color: '#4a4a4a',
+    color: '#00ff88',
     textDecorationLine: 'underline',
   },
   insuranceIconContainer: {

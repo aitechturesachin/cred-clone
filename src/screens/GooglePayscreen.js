@@ -176,24 +176,39 @@ const GooglePayScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.billCard}>
-          <Text style={styles.amount}>{selectedCard.amount}</Text>
+          <View style={styles.amountRow}>
+            <Ionicons name="card-outline" size={22} color="#5f6368" />
+            <Text style={styles.amount}>{selectedCard.amount}</Text>
+          </View>
 
           <View style={styles.metaRow}>
-            <Text style={styles.metaLabel}>Bill date</Text>
+            <View style={styles.metaLabelRow}>
+              <Ionicons name="calendar-outline" size={14} color="#80868b" />
+              <Text style={styles.metaLabel}>Bill date</Text>
+            </View>
             <Text style={styles.metaValue}>{selectedCard.billDate}</Text>
           </View>
           <View style={styles.metaRow}>
-            <Text style={styles.metaLabel}>Due date</Text>
+            <View style={styles.metaLabelRow}>
+              <Ionicons name="alarm-outline" size={14} color="#80868b" />
+              <Text style={styles.metaLabel}>Due date</Text>
+            </View>
             <Text style={styles.metaValue}>{selectedCard.dueDate}</Text>
           </View>
           <View style={styles.metaRow}>
-            <Text style={styles.metaLabel}>Bill number</Text>
+            <View style={styles.metaLabelRow}>
+              <Ionicons name="receipt-outline" size={14} color="#80868b" />
+              <Text style={styles.metaLabel}>Bill number</Text>
+            </View>
             <Text style={styles.metaValue}>{selectedCard.billNumber}</Text>
           </View>
 
-          <Text style={styles.failedText}>
-            {selectedCard.failedAttempts} failed payment attempts
-          </Text>
+          <View style={styles.failedRow}>
+            <Ionicons name="warning-outline" size={16} color="#d93025" />
+            <Text style={styles.failedText}>
+              {selectedCard.failedAttempts} failed payment attempts
+            </Text>
+          </View>
 
           <TouchableOpacity style={styles.statusRow} activeOpacity={0.7}>
             <Ionicons name="time-outline" size={20} color="#5f6368" />
@@ -206,6 +221,7 @@ const GooglePayScreen = ({ navigation }) => {
             onPress={openFailScreen}
             activeOpacity={0.85}
           >
+            <Ionicons name="flash" size={18} color="#001d35" />
             <Text style={styles.payBillText}>Pay bill</Text>
           </TouchableOpacity>
         </View>
@@ -526,17 +542,28 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
+  amountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 18,
+  },
   amount: {
     fontSize: 32,
     fontWeight: '500',
     color: '#202124',
-    marginBottom: 18,
   },
   metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    alignItems: 'center',
     paddingVertical: 6,
+  },
+  metaLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   metaLabel: {
     fontSize: 14,
@@ -547,11 +574,16 @@ const styles = StyleSheet.create({
     color: '#202124',
     fontWeight: '500',
   },
-  failedText: {
-    fontSize: 13,
-    color: '#3c4043',
+  failedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     marginTop: 14,
     marginBottom: 4,
+  },
+  failedText: {
+    fontSize: 13,
+    color: '#d93025',
   },
   statusRow: {
     flexDirection: 'row',
@@ -573,6 +605,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingVertical: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
   payBillText: {
     fontSize: 15,

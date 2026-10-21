@@ -6,7 +6,18 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+
+const getStatusIcon = (statusType) => {
+  if (statusType === "paid") return { name: "checkmark-circle", color: "#00c853" };
+  // Paid late = amber/orange (paid, but delayed)
+  if (statusType === "late") return { name: "time", color: "#ff9500" };
+  // Overdue = red (still unpaid)
+  if (statusType === "overdue") return { name: "alert-circle", color: "#ff3b30" };
+  if (statusType === "due") return { name: "calendar", color: "#ff7a4a" };
+  if (statusType === "failed") return { name: "close-circle", color: "#9c27b0" };
+  return { name: "ellipse-outline", color: "#999" };
+};
 
 const EMI_SCHEDULE = [
   {
@@ -173,10 +184,10 @@ const EMI_SCHEDULE = [
 const EMIRepaymentScheduleScreen = ({ navigation }) => {
   const getStatusColor = (statusType) => {
     if (statusType === "paid") return "#00c853";
-    if (statusType === "late") return "#ff3b30";
-    if (statusType === "overdue") return "#b71c1c";
+    if (statusType === "late") return "#ff9500"; // amber — paid late
+    if (statusType === "overdue") return "#ff3b30"; // red — overdue
     if (statusType === "due") return "#ff7a4a";
-    if (statusType === "failed") return "#FF5722";
+    if (statusType === "failed") return "#9c27b0";
     return "#999";
   };
 
@@ -194,13 +205,21 @@ const EMIRepaymentScheduleScreen = ({ navigation }) => {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
-        <Text style={styles.title}>EMI repayment schedule</Text>
-        <Text style={styles.subtitle}>
-          paying EMIs on time improves your credit score
-        </Text>
+        <View style={styles.titleRow}>
+          <MaterialCommunityIcons name="calendar-clock" size={26} color="#fff" />
+          <Text style={styles.title}>EMI repayment schedule</Text>
+        </View>
+        <View style={styles.subtitleRow}>
+          <Ionicons name="trending-up" size={14} color="#00c853" />
+          <Text style={styles.subtitle}>
+            paying EMIs on time improves your credit score
+          </Text>
+        </View>
 
         <View style={styles.list}>
-          {EMI_SCHEDULE.map((item, index) => (
+          {EMI_SCHEDULE.map((item, index) => {
+            const statusIcon = getStatusIcon(item.statusType);
+            return (
             <View
               key={item.date + index}
               style={[
@@ -208,10 +227,17 @@ const EMIRepaymentScheduleScreen = ({ navigation }) => {
                 index < EMI_SCHEDULE.length - 1 && styles.emiRowBorder,
               ]}
             >
+              <View style={styles.statusIconWrap}>
+                <Ionicons
+                  name={statusIcon.name}
+                  size={20}
+                  color={statusIcon.color}
+                />
+              </View>
               <View style={styles.emiLeft}>
                 <Text style={styles.emiDate}>{item.date}</Text>
                 {item.statusType === "overdue" ? (
-                  <Text style={styles.emiStatus}>
+                  <View style={styles.overdueStatusRow}>
                     <Text
                       style={[
                         styles.emiStatus,
@@ -229,7 +255,7 @@ const EMIRepaymentScheduleScreen = ({ navigation }) => {
                       {" "}
                       charges applied + {item.overdueCharges}
                     </Text>
-                  </Text>
+                  </View>
                 ) : (
                   <Text
                     style={[
@@ -243,7 +269,8 @@ const EMIRepaymentScheduleScreen = ({ navigation }) => {
               </View>
               <Text style={styles.emiAmount}>{item.amount}</Text>
             </View>
-          ))}
+            );
+          })}
         </View>
 
         <View style={styles.footerNote}>
@@ -281,18 +308,30 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
   title: {
     fontSize: 24,
     fontWeight: "700",
     color: "#fff",
+    flex: 1,
+  },
+  subtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     paddingHorizontal: 20,
-    marginBottom: 8,
+    marginBottom: 24,
   },
   subtitle: {
     fontSize: 14,
     color: "#999",
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    flex: 1,
   },
   list: {
     backgroundColor: "#252525",
@@ -305,14 +344,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   emiRowBorder: {
     borderBottomWidth: 1,
     borderBottomColor: "#333",
   },
+  statusIconWrap: {
+    marginRight: 12,
+  },
   emiLeft: {
     flex: 1,
+  },
+  overdueStatusRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
   },
   emiDate: {
     fontSize: 16,

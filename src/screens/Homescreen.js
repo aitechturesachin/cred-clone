@@ -53,7 +53,10 @@ const HomeScreen = ({ navigation }) => {
 
         {/* Money Matters Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>MONEY MATTERS</Text>
+          <View style={styles.sectionTitleRow}>
+            <MaterialCommunityIcons name="cash-multiple" size={16} color="#999" />
+            <Text style={[styles.sectionTitle, styles.sectionTitleInline]}>MONEY MATTERS</Text>
+          </View>
           <View style={styles.moneyRow}>
             <TouchableOpacity
               style={styles.moneyCard}
@@ -76,9 +79,15 @@ const HomeScreen = ({ navigation }) => {
         {/* Upcoming Bills Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>UPCOMING BILLS (5)</Text>
-            <TouchableOpacity>
+            <View style={[styles.sectionTitleRow, styles.sectionTitleRowHeader]}>
+              <Ionicons name="receipt-outline" size={16} color="#999" />
+              <Text style={[styles.sectionTitle, styles.sectionTitleInline]}>
+                UPCOMING BILLS (5)
+              </Text>
+            </View>
+            <TouchableOpacity style={styles.viewAllRow}>
               <Text style={styles.viewAll}>view all</Text>
+              <Ionicons name="chevron-forward" size={14} color="#666" />
             </TouchableOpacity>
           </View>
           
@@ -101,7 +110,10 @@ const HomeScreen = ({ navigation }) => {
 
         {/* For You Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>FOR YOU</Text>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="star-outline" size={16} color="#999" />
+            <Text style={[styles.sectionTitle, styles.sectionTitleInline]}>FOR YOU</Text>
+          </View>
           <View style={styles.forYouGrid}>
             <ForYouItem icon="account-multiple" label="pay contacts" />
             <ForYouItem icon="receipt" label="bills & recharges" />
@@ -137,9 +149,13 @@ const BillCard = ({ title, subtitle, amount, dueText, onPress }) => (
     </View>
     <View style={styles.billAction}>
       <TouchableOpacity style={styles.payButton}>
+        <Ionicons name="flash" size={14} color="#fff" />
         <Text style={styles.payButtonText}>{amount}</Text>
       </TouchableOpacity>
-      <Text style={styles.dueText}>{dueText}</Text>
+      <View style={styles.dueRow}>
+        <Ionicons name="time-outline" size={11} color="#ff6b35" />
+        <Text style={styles.dueText}>{dueText}</Text>
+      </View>
     </View>
   </TouchableOpacity>
 );
@@ -309,12 +325,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 12,
     fontWeight: '600',
     color: '#999',
     letterSpacing: 1,
     marginBottom: 16,
+  },
+  sectionTitleInline: {
+    marginBottom: 0,
+  },
+  sectionTitleRowHeader: {
+    marginBottom: 0,
+  },
+  viewAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
   viewAll: {
     fontSize: 14,
@@ -414,15 +447,23 @@ const styles = StyleSheet.create({
   },
   payButton: {
     backgroundColor: '#1a1a1a',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
     marginBottom: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   payButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  dueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   dueText: {
     fontSize: 11,

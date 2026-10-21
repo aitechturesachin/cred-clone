@@ -8,7 +8,13 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-const EMI_PAY_AMOUNT = '30,121.87';
+// ₹19,904.25 (principal left) + ₹10,216.75 (overdue charges) = ₹30,121.00
+const PRINCIPAL_LEFT = 19904.25;
+const OVERDUE_CHARGES = 10216.75;
+const EMI_PAY_AMOUNT = (PRINCIPAL_LEFT + OVERDUE_CHARGES).toLocaleString(
+  'en-IN',
+  { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+);
 
 const EMIDetailsScreen = ({ navigation }) => {
   return (
@@ -50,9 +56,18 @@ const EMIDetailsScreen = ({ navigation }) => {
             {/* Bottom white section */}
             <View style={styles.needsCardBottom}>
               <Text style={styles.amount}>₹{EMI_PAY_AMOUNT}</Text>
-              <Text style={styles.accountDetails}>
-                Sandeep singh 103680 • EMI 22 of 24
-              </Text>
+              <View style={styles.warningRow}>
+                <Ionicons name="warning" size={14} color="#ff6b35" />
+                <Text style={styles.dueTitleOrange}>
+                  pay early to avoid lien up to 30% of your loan amount
+                </Text>
+              </View>
+              <View style={styles.accountRow}>
+                <Ionicons name="person-outline" size={14} color="#666" />
+                <Text style={styles.accountDetails}>
+                  Sandeep singh 103680 • EMI 22 of 24
+                </Text>
+              </View>
 
               <View style={styles.buttonRow}>
                 <TouchableOpacity
@@ -65,6 +80,7 @@ const EMIDetailsScreen = ({ navigation }) => {
                   }
                   activeOpacity={0.8}
                 >
+                  <Ionicons name="flash" size={16} color="#1a1a1a" />
                   <Text style={styles.payNowText}>Pay now</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -72,6 +88,7 @@ const EMIDetailsScreen = ({ navigation }) => {
                   onPress={() => navigation?.navigate('LoanDetails')}
                   activeOpacity={0.8}
                 >
+                  <Ionicons name="document-text-outline" size={16} color="#fff" />
                   <Text style={styles.viewDetailsText}>View details</Text>
                 </TouchableOpacity>
               </View>
@@ -89,22 +106,34 @@ const EMIDetailsScreen = ({ navigation }) => {
               <View style={styles.progressRingOuter} />
               <View style={styles.progressCenter}>
                 <MaterialCommunityIcons name="shield-check" size={32} color="#00ff88" />
-                <Text style={styles.progressPercentage}>80%</Text>
+                <Text style={styles.progressPercentage}>83%</Text>
                 <Text style={styles.progressLabel}>paid</Text>
               </View>
             </View>
 
             {/* Draw Info */}
             <View style={styles.drawInfo}>
-              <Text style={styles.onTrackLabel}>ON TRACK</Text>
+              <View style={styles.onTrackRow}>
+                <Ionicons name="checkmark-circle" size={14} color="#00ff88" />
+                <Text style={styles.onTrackLabel}>ON TRACK</Text>
+              </View>
               <Text style={styles.drawName}>Sandeep singh 103680</Text>
-              <Text style={styles.drawSubtitle}>4 months left</Text>
+              <View style={styles.monthsLeftRow}>
+                <Ionicons name="time-outline" size={14} color="#666" />
+                <Text style={styles.drawSubtitle}>4 months left</Text>
+              </View>
             </View>
           </View>
         </View>
 
         {/* Exclusive Benefits Section */}
         <View style={styles.benefitsSection}>
+          <MaterialCommunityIcons
+            name="gift-outline"
+            size={36}
+            color="#fff"
+            style={styles.benefitsIcon}
+          />
           <Text style={styles.benefitsTitle}>
             exclusive benefits{'\n'}
             for your CRED cash
@@ -169,7 +198,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dueTitleOrange: {
+    flex: 1,
+    fontSize: 12,
     color: '#ff6b35',
+  },
+  warningRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    marginBottom: 10,
   },
   emiSubtitle: {
     fontSize: 13,
@@ -194,10 +231,15 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     marginBottom: 4,
   },
+  accountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 20,
+  },
   accountDetails: {
     fontSize: 13,
     color: '#666',
-    marginBottom: 20,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -211,6 +253,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
   },
   payNowText: {
     fontSize: 15,
@@ -223,6 +268,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
   },
   viewDetailsText: {
     fontSize: 15,
@@ -269,12 +317,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
+  onTrackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 8,
+  },
   onTrackLabel: {
     fontSize: 11,
     fontWeight: '700',
     color: '#00ff88',
     letterSpacing: 1.5,
-    marginBottom: 8,
   },
   drawName: {
     fontSize: 18,
@@ -282,9 +335,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 4,
   },
+  monthsLeftRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   drawSubtitle: {
     fontSize: 13,
     color: '#666',
+  },
+  benefitsIcon: {
+    marginBottom: 12,
   },
   benefitsSection: {
     paddingHorizontal: 20,

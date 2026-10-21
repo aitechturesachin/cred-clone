@@ -799,7 +799,10 @@ const PaytmLoanScreen = ({ navigation }) => {
         >
           <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Loan Account</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="wallet-outline" size={20} color="#1a1a1a" />
+          <Text style={styles.headerTitle}>Loan Account</Text>
+        </View>
         <View style={styles.headerRight} />
       </View>
 
@@ -810,23 +813,30 @@ const PaytmLoanScreen = ({ navigation }) => {
       >
         {/* Left panel / Summary card */}
         <View style={styles.summaryCard}>
-          <Text style={styles.poweredBy}>Powered by Paytm</Text>
+          <View style={styles.poweredByRow}>
+            <Ionicons name="flash" size={14} color="#007aff" />
+            <Text style={styles.poweredBy}>Powered by Paytm</Text>
+          </View>
           <View style={styles.amountRow}>
             <Text style={styles.amountCurrent}>₹ 1,63,816.08</Text>
             <Text style={styles.amountStrike}>₹2,00,000</Text>
             <View style={styles.infoCircle}>
-              <Text style={styles.infoCircleText}>i</Text>
+              <Ionicons name="information" size={12} color="#666" />
             </View>
           </View>
-          <Text style={styles.accountNo}>
-            Loan A/C No. MFLPAYTMFOLOQ005526923
-          </Text>
-          <TouchableOpacity style={styles.loanDetailsLink} onPress={() => {}}>
+          <View style={styles.accountNoRow}>
+            <Ionicons name="card-outline" size={14} color="#666" />
+            <Text style={styles.accountNo}>
+              Loan A/C No. MFLPAYTMFOLOQ005526923
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.loanDetailsLink} onPress={() => {}} activeOpacity={0.8}>
             <Text style={styles.loanDetailsLinkText}>Loan details</Text>
+            <Ionicons name="chevron-forward" size={16} color="#007aff" />
           </TouchableOpacity>
           <View style={styles.statusRow}>
             <View style={styles.statusLeft}>
-              <View style={styles.statusDot} />
+              <Ionicons name="checkmark-circle" size={22} color="#00c853" />
               <View>
                 <Text style={styles.statusTitle}>Total Dues Paid</Text>
                 <Text style={styles.statusSubtitle}>
@@ -839,6 +849,7 @@ const PaytmLoanScreen = ({ navigation }) => {
               onPress={() => {}}
               activeOpacity={0.8}
             >
+              <Ionicons name="cash-outline" size={16} color="#fff" />
               <Text style={styles.payMoreButtonText}>Pay More</Text>
             </TouchableOpacity>
           </View>
@@ -863,18 +874,21 @@ const PaytmLoanScreen = ({ navigation }) => {
         {/* Timeline section */}
         <View style={styles.timelineSection}>
           <View style={styles.timelineHeader}>
-            <Text style={styles.timelineSectionTitle}>Repayment History</Text>
+            <View style={styles.timelineTitleRow}>
+              <Ionicons name="time-outline" size={18} color="#1a1a1a" />
+              <Text style={styles.timelineSectionTitle}>Repayment History</Text>
+            </View>
             <View style={styles.legendRow}>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, styles.legendDotPaid]} />
+                <Ionicons name="checkmark-circle" size={12} color="#00c853" />
                 <Text style={styles.legendText}>Paid</Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, styles.legendDotOverdue]} />
+                <Ionicons name="alert-circle" size={12} color="#c62828" />
                 <Text style={styles.legendText}>Overdue</Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, styles.legendDotRestructured]} />
+                <Ionicons name="swap-horizontal" size={12} color="#ff9800" />
                 <Text style={styles.legendText}>Restructured</Text>
               </View>
             </View>
@@ -917,6 +931,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginLeft: -8,
   },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
@@ -937,10 +956,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e5e5",
   },
+  poweredByRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginBottom: 8,
+  },
   poweredBy: {
     fontSize: 10,
     color: "#666",
-    marginBottom: 8,
   },
   amountRow: {
     flexDirection: "row",
@@ -962,25 +986,29 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "#007aff",
+    backgroundColor: "#e8f4ff",
     marginLeft: 10,
     justifyContent: "center",
     alignItems: "center",
   },
-  infoCircleText: {
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: "700",
+  accountNoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 6,
   },
   accountNo: {
     fontSize: 12,
     color: "#888",
     fontFamily: "monospace",
-    marginBottom: 6,
+    flex: 1,
   },
   loanDetailsLink: {
     alignSelf: "flex-start",
     marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
   },
   loanDetailsLinkText: {
     color: "#007aff",
@@ -998,13 +1026,7 @@ const styles = StyleSheet.create({
   statusLeft: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#34c759",
-    marginRight: 10,
+    gap: 10,
   },
   statusTitle: {
     fontWeight: "600",
@@ -1025,6 +1047,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   payMoreButtonText: {
     color: "#fff",
@@ -1090,6 +1115,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafbfc",
     borderBottomWidth: 1,
     borderBottomColor: "#e5e5e5",
+  },
+  timelineTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
   },
   timelineSectionTitle: {
     fontSize: 20,
