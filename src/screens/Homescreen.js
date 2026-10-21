@@ -107,6 +107,18 @@ const HomeScreen = ({ navigation }) => {
             <ForYouItem icon="receipt" label="bills & recharges" />
             <ForYouItem icon="book-open" label="education fees" badge="INSTANT" />
             <ForYouItem icon="gift" label="rewards" />
+            <ForYouItem
+              icon="bank"
+              label="paytm"
+              accent="paytm"
+              onPress={() => navigation?.navigate('PaytmLoan')}
+            />
+            <ForYouItem
+              icon="google"
+              label="google pay"
+              accent="gpay"
+              onPress={() => navigation?.navigate('GooglePay')}
+            />
           </View>
         </View>
       </ScrollView>
@@ -132,19 +144,45 @@ const BillCard = ({ title, subtitle, amount, dueText, onPress }) => (
   </TouchableOpacity>
 );
 
-const ForYouItem = ({ icon, label, badge }) => (
-  <View style={styles.forYouItem}>
-    <View style={styles.forYouIconContainer}>
-      <MaterialCommunityIcons name={icon} size={32} color="#1a1a1a" />
-      {badge && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeLabel}>{badge}</Text>
-        </View>
-      )}
-    </View>
-    <Text style={styles.forYouLabel}>{label}</Text>
-  </View>
-);
+const ForYouItem = ({ icon, label, badge, onPress, accent }) => {
+  const iconColor =
+    accent === 'gpay' ? '#1a73e8' : accent === 'paytm' ? '#007aff' : '#1a1a1a';
+  const iconBg =
+    accent === 'gpay'
+      ? styles.forYouIconContainerGpay
+      : accent === 'paytm'
+        ? styles.forYouIconContainerPaytm
+        : null;
+  const content = (
+    <>
+      <View style={[styles.forYouIconContainer, iconBg]}>
+        <MaterialCommunityIcons
+          name={icon}
+          size={32}
+          color={iconColor}
+        />
+        {badge && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeLabel}>{badge}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={styles.forYouLabel}>{label}</Text>
+    </>
+  );
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        style={styles.forYouItem}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
+  return <View style={styles.forYouItem}>{content}</View>;
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -414,6 +452,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     position: 'relative',
+  },
+  forYouIconContainerPaytm: {
+    backgroundColor: '#e8f4ff',
+  },
+  forYouIconContainerGpay: {
+    backgroundColor: '#e8f0fe',
   },
   badge: {
     position: 'absolute',

@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
+const EMI_PAY_AMOUNT = '30,121.87';
+
 const EMIDetailsScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
@@ -32,7 +34,7 @@ const EMIDetailsScreen = ({ navigation }) => {
               <View style={styles.needsCardHeader}>
                 <View>
                   <Text style={styles.emiTitle}>
-                    EMI <Text style={styles.dueTitleOrange}>Overdue(s)</Text>
+                    EMI <Text style={styles.dueTitleOrange}>Overdue 2 EMI(s)</Text>
                   </Text>
                   <Text style={styles.emiSubtitle}>
                     your autopay setup will take care of{'\n'}
@@ -47,13 +49,22 @@ const EMIDetailsScreen = ({ navigation }) => {
 
             {/* Bottom white section */}
             <View style={styles.needsCardBottom}>
-              <Text style={styles.amount}>₹5,121</Text>
+              <Text style={styles.amount}>₹{EMI_PAY_AMOUNT}</Text>
               <Text style={styles.accountDetails}>
-                Sandeep singh 103680 • EMI 13 of 24
+                Sandeep singh 103680 • EMI 22 of 24
               </Text>
 
               <View style={styles.buttonRow}>
-                <TouchableOpacity style={styles.payNowButton}>
+                <TouchableOpacity
+                  style={styles.payNowButton}
+                  onPress={() =>
+                    navigation?.navigate('LoanDetails', {
+                      openPayModal: true,
+                      payAmount: EMI_PAY_AMOUNT,
+                    })
+                  }
+                  activeOpacity={0.8}
+                >
                   <Text style={styles.payNowText}>Pay now</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -78,7 +89,7 @@ const EMIDetailsScreen = ({ navigation }) => {
               <View style={styles.progressRingOuter} />
               <View style={styles.progressCenter}>
                 <MaterialCommunityIcons name="shield-check" size={32} color="#00ff88" />
-                <Text style={styles.progressPercentage}>60%</Text>
+                <Text style={styles.progressPercentage}>80%</Text>
                 <Text style={styles.progressLabel}>paid</Text>
               </View>
             </View>
@@ -87,7 +98,7 @@ const EMIDetailsScreen = ({ navigation }) => {
             <View style={styles.drawInfo}>
               <Text style={styles.onTrackLabel}>ON TRACK</Text>
               <Text style={styles.drawName}>Sandeep singh 103680</Text>
-              <Text style={styles.drawSubtitle}>6 months left</Text>
+              <Text style={styles.drawSubtitle}>4 months left</Text>
             </View>
           </View>
         </View>

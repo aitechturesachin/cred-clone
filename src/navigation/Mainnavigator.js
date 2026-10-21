@@ -4,6 +4,8 @@ import BottomTabNavigator from './Bottomtabnavigator';
 import EMIDetailsScreen from '../screens/Emidetailsscreen';
 import LoanDetailsScreen from '../screens/Loandetailsscreen';
 import EMIRepaymentScheduleScreen from '../screens/Emirepaymentschedulescreen';
+import PaytmLoanScreen from '../screens/PaytmLoanscreen';
+import GooglePayScreen from '../screens/GooglePayscreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +21,8 @@ const MainNavigator = () => {
       <Stack.Screen name="EMIDetails" component={EMIDetailsScreen} />
       <Stack.Screen name="LoanDetails" component={LoanDetailsScreen} />
       <Stack.Screen name="EmiRepaymentSchedule" component={EMIRepaymentScheduleScreen} />
+      <Stack.Screen name="PaytmLoan" component={PaytmLoanScreen} />
+      <Stack.Screen name="GooglePay" component={GooglePayScreen} />
     </Stack.Navigator>
   );
 };

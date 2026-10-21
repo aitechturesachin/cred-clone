@@ -91,72 +91,82 @@ const EMI_SCHEDULE = [
   },
   {
     date: "02 nov '25",
-    statusType: "overdue",
-    overdueCharges: "₹5,034.16",
-    amount: "₹10,155.16",
+    status: "paid late",
+    statusType: "late",
+    amount: "₹5,121",
   },
   {
     date: "02 dec '25",
-    statusType: "overdue",
-    overdueCharges: "₹3,845.16",
-    amount: "₹8,966.16",
+    status: "paid late",
+    statusType: "late",
+    amount: "₹5,121",
   },
 
   {
     date: "02 jan '26",
-    statusType: "overdue",
-    overdueCharges: "₹2,616.53",
-    amount: "₹7,737.53",
+    status: "paid on time",
+    statusType: "paid",
+    amount: "₹5,121",
   },
   {
     date: "02 feb '26",
-    statusType: "overdue",
-    overdueCharges: "₹1,387.90",
-    amount: "₹6,508.90",
+    status: "paid late",
+    statusType: "late",
+    amount: "₹5,121",
   },
 
   {
     date: "02 mar '26",
     statusType: "overdue",
-    overdueCharges: "₹397.90",
-    amount: "₹5,518.90",
+    overdueCharges: "₹10,200.60",
+    amount: "₹15,321.60",
   },
   {
     date: "02 apr '26",
-    status: "due in 25 days",
-    statusType: "due",
-    amount: "₹5,121",
+    statusType: "overdue",
+    overdueCharges: "₹9,000.87",
+    amount: "₹14,121.87",
   },
   {
     date: "02 may '26",
-    status: "upcoming",
-    statusType: "upcoming",
+    status: "paid late",
+    statusType: "late",
     amount: "₹5,121",
+    // statusType: "overdue",
+    // overdueCharges: "₹1,320.87",
   },
   {
     date: "02 jun '26",
-    status: "upcoming",
-    statusType: "upcoming",
+    status: "paid late",
+    statusType: "late",
     amount: "₹5,121",
   },
+  // {
+  //   date: "02 jul '26",
+  //   statusType: "overdue",
+  //   overdueCharges: "₹1,600.25",
+  //   amount: "₹6,721.60",
+  // },
+
   {
     date: "02 jul '26",
-    status: "upcoming",
-    statusType: "upcoming",
-    amount: "₹5,121",
+    status: "paid late",
+    statusType: "late",
+    overdueCharges: "₹1,600.25",
+    amount: "₹6,721.60",
   },
   {
     date: "02 aug '26",
-    status: "upcoming",
-    statusType: "upcoming",
+    status: "paid late",
+    statusType: "late",
     amount: "₹5,121",
   },
 
   {
     date: "02 sep '26",
-    status: "upcoming",
-    statusType: "upcoming",
-    amount: "₹5,118.34",
+    status: "paid on time",
+    statusType: "paid",
+    amount: "₹5,580.00",
   },
 ];
 
@@ -165,7 +175,8 @@ const EMIRepaymentScheduleScreen = ({ navigation }) => {
     if (statusType === "paid") return "#00c853";
     if (statusType === "late") return "#ff3b30";
     if (statusType === "overdue") return "#b71c1c";
-    if (statusType === "due") return "#ff6b35";
+    if (statusType === "due") return "#ff7a4a";
+    if (statusType === "failed") return "#FF5722";
     return "#999";
   };
 

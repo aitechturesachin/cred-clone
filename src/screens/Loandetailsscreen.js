@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,19 @@ import {
   Modal,
   Pressable,
   Image,
+  Platform,
+  Linking,
+  Alert,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Asset } from 'expo-asset';
+
+const STATEMENT_PDF_ASSET = require('../../assets/StatementofAccount.pdf');
+
+// Lazy-load native modules so app doesn't crash in Expo Go (they're only in dev builds)
+const getFileSystem = () => require('expo-file-system/legacy');
+const getSharing = () => require('expo-sharing');
+const getIntentLauncher = () => require('expo-intent-launcher');
 
 const REASON_OPTIONS = [
   'I have a better loan offer',
@@ -17,11 +28,95 @@ const REASON_OPTIONS = [
   'I have another reason',
 ];
 
-const LoanDetailsScreen = ({ navigation }) => {
+const getStatementPdfUri = async () => {
+  const asset = Asset.fromModule(STATEMENT_PDF_ASSET);
+  await asset.downloadAsync();
+  if (!asset.localUri) throw new Error('PDF not available');
+  return asset.localUri;
+};
+
+const DEFAULT_PAY_AMOUNT = '37,084';
+
+const LoanDetailsScreen = ({ navigation, route }) => {
   const [showRepaymentModal, setShowRepaymentModal] = useState(false);
   const [showReasonModal, setShowReasonModal] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
+  const [showSummaryPanel, setShowSummaryPanel] = useState(false);
+  const [showLoanDocumentsModal, setShowLoanDocumentsModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState(null);
+  const [payAmount, setPayAmount] = useState(DEFAULT_PAY_AMOUNT);
+
+  useEffect(() => {
+    if (route?.params?.openPayModal) {
+      if (route?.params?.payAmount) {
+        setPayAmount(route.params.payAmount);
+      }
+      setShowPayModal(true);
+      navigation?.setParams?.({ openPayModal: false });
+    }
+  }, [route?.params?.openPayModal, route?.params?.payAmount, navigation]);
+
+  const showDevBuildRequired = () => {
+    Alert.alert(
+      'Development build required',
+      'View/Download PDF uses native modules (ExpoSharing, etc.) that are not included in Expo Go. Run a development build:\n\n• Android: npx expo run:android\n• iOS: npx expo run:ios',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleViewStatementPdf = async () => {
+    try {
+      const uri = await getStatementPdfUri();
+      if (Platform.OS === 'android') {
+        const FileSystem = getFileSystem();
+        const IntentLauncher = getIntentLauncher();
+        const contentUri = await FileSystem.getContentUriAsync(uri);
+        await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+          data: contentUri,
+          type: 'application/pdf',
+          flags: 1,
+        });
+      } else {
+        const canOpen = await Linking.canOpenURL(uri);
+        if (canOpen) {
+          await Linking.openURL(uri);
+        } else {
+          const Sharing = getSharing();
+          await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Statement of Account' });
+        }
+      }
+    } catch (e) {
+      const msg = e?.message || '';
+      if (msg.includes('ExpoSharing') || msg.includes('native module') || msg.includes('Cannot find native')) {
+        showDevBuildRequired();
+      } else {
+        Alert.alert('Error', msg || 'Could not open PDF');
+      }
+    }
+  };
+
+  const handleDownloadStatementPdf = async () => {
+    try {
+      const uri = await getStatementPdfUri();
+      const Sharing = getSharing();
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert('Not available', 'Sharing is not available on this device.');
+        return;
+      }
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'Save Statement of Account',
+      });
+    } catch (e) {
+      const msg = e?.message || '';
+      if (msg.includes('ExpoSharing') || msg.includes('native module') || msg.includes('Cannot find native')) {
+        showDevBuildRequired();
+      } else {
+        Alert.alert('Error', msg || 'Could not download PDF');
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -60,7 +155,7 @@ const LoanDetailsScreen = ({ navigation }) => {
             </View>
             <TouchableOpacity
               style={styles.arrowButton}
-              onPress={() => navigation?.navigate('EmiRepaymentSchedule')}
+              onPress={() => setShowSummaryPanel(true)}
               activeOpacity={0.8}
             >
               <Ionicons name="arrow-forward" size={20} color="#fff" />
@@ -101,7 +196,7 @@ const LoanDetailsScreen = ({ navigation }) => {
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
             <View style={styles.progressInfo}>
-              <Text style={styles.progressPercentage}>60%</Text>
+              <Text style={styles.progressPercentage}>80%</Text>
               <View style={styles.progressLabels}>
                 <Text style={styles.progressLabel}>paid</Text>
                 <Text style={styles.progressLabel}>till date</Text>
@@ -121,7 +216,7 @@ const LoanDetailsScreen = ({ navigation }) => {
           <View style={styles.paymentDetails}>
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>amount paid</Text>
-              <Text style={styles.paymentValue}>₹62355.53</Text>
+              <Text style={styles.paymentValue}>₹69,076.53</Text>
             </View>
             {/* <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>principal paid</Text>
@@ -129,13 +224,20 @@ const LoanDetailsScreen = ({ navigation }) => {
             </View> */}
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>principal left</Text>
-              <Text style={styles.paymentValue}>₹41,334.71</Text>
+              <Text style={styles.paymentValue}>₹37,084.99</Text>
             </View>
           </View>
         </View>
 
         {/* Want to Pay Now Button */}
-        <TouchableOpacity style={styles.payNowCard}>
+        <TouchableOpacity
+          style={styles.payNowCard}
+          onPress={() => {
+            setPayAmount(DEFAULT_PAY_AMOUNT);
+            setShowPayModal(true);
+          }}
+          activeOpacity={0.8}
+        >
           <Text style={styles.payNowText}>Want to pay now?</Text>
           <Ionicons name="arrow-forward" size={20} color="#1a1a1a" />
         </TouchableOpacity>
@@ -177,7 +279,11 @@ const LoanDetailsScreen = ({ navigation }) => {
             <Ionicons name="arrow-forward" size={20} color="#666" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => setShowLoanDocumentsModal(true)}
+            activeOpacity={0.7}
+          >
             <View style={styles.actionIconContainer}>
               <Ionicons name="document-text-outline" size={22} color="#fff" />
             </View>
@@ -343,6 +449,7 @@ const LoanDetailsScreen = ({ navigation }) => {
               style={styles.proceedButton}
               onPress={() => {
                 setShowReasonModal(false);
+                setPayAmount(DEFAULT_PAY_AMOUNT);
                 setShowPayModal(true);
               }}
               activeOpacity={0.8}
@@ -389,7 +496,7 @@ const LoanDetailsScreen = ({ navigation }) => {
               </View>
               <View style={styles.paySheetForeclosureInfo}>
                 <Text style={styles.paySheetForeclosureLabel}>LOAN FORECLOSURE</Text>
-                <Text style={styles.paySheetForeclosureAmount}>₹64468.99</Text>
+                <Text style={styles.paySheetForeclosureAmount}>₹{payAmount}</Text>
               </View>
             </View>
 
@@ -412,7 +519,7 @@ const LoanDetailsScreen = ({ navigation }) => {
                   <Text style={styles.paySheetMethodName}>Icici Bank XX6667</Text>
                 </View>
                 <View style={styles.paySheetMethodRadio}>
-                  <View style={styles.paySheetMethodRadioInner} />
+                  {/* <View style={styles.paySheetMethodRadioInner} /> */}
                 </View>
               </View>
               
@@ -437,7 +544,7 @@ const LoanDetailsScreen = ({ navigation }) => {
               <View style={styles.paySheetNetPayable}>
                 <Text style={styles.paySheetNetLabel}>net payable</Text>
                 <View style={styles.paySheetNetRow}>
-                  <Text style={styles.paySheetNetAmount}>₹64468.99</Text>
+                  <Text style={styles.paySheetNetAmount}>₹{payAmount}</Text>
                   <Ionicons name="chevron-forward" size={18} color="#666" />
                 </View>
               </View>
@@ -449,6 +556,175 @@ const LoanDetailsScreen = ({ navigation }) => {
                 <Text style={styles.payNowButtonText}>Pay now</Text>
                 <Ionicons name="arrow-forward" size={20} color="#fff" />
               </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Bottom sheet: Loan SUMMARY (arrow on amount card) */}
+      <Modal
+        visible={showSummaryPanel}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowSummaryPanel(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowSummaryPanel(false)}
+        >
+          <Pressable style={styles.summarySheet} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.bottomSheetHandle} />
+            <View style={styles.summarySheetHeader}>
+              <Text style={styles.summarySheetTitle}>SUMMARY</Text>
+              <Text style={styles.summarySheetRate}>@16.99% PER YEAR</Text>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={styles.summarySheetScroll}>
+              {/* Your total loan amount */}
+              <View style={styles.summaryBlock}>
+                <View style={styles.summaryRowMain}>
+                  <Text style={styles.summaryBlockTitle}>your total loan amount</Text>
+                  <Text style={styles.summaryBlockValue}>₹1,03,680</Text>
+                </View>
+                <View style={styles.summaryBreakdown}>
+                  <View style={styles.summaryBreakdownRow}>
+                    <Text style={styles.summaryBreakdownLabel}>+ credit amount</Text>
+                    <Text style={styles.summaryBreakdownValue}>₹1,00,000</Text>
+                  </View>
+                  <View style={styles.summaryBreakdownRow}>
+                    <Text style={styles.summaryBreakdownLabel}>+ insurance</Text>
+                    <Text style={styles.summaryBreakdownValue}>₹1,180</Text>
+                  </View>
+                  <View style={styles.summaryBreakdownRow}>
+                    <Text style={styles.summaryBreakdownLabel}>+ processing fee (inc. taxes)</Text>
+                    <View style={styles.summaryBreakdownRight}>
+                      <Text style={styles.summaryBreakdownValue}>₹2,500</Text>
+                      <Ionicons name="chevron-down" size={16} color="#666" />
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              {/* EMI per month */}
+              <View style={styles.summaryBlock}>
+                <View style={styles.summaryRowMain}>
+                  <Text style={styles.summaryBlockTitle}>EMI per month</Text>
+                  <Text style={styles.summaryBlockValue}>₹5,121</Text>
+                </View>
+                <View style={styles.summaryBreakdown}>
+                  <View style={styles.summaryBreakdownRow}>
+                    <Text style={styles.summaryBreakdownLabel}>first EMI date</Text>
+                    <Text style={styles.summaryBreakdownValue}>02 oct '24</Text>
+                  </View>
+                  <View style={styles.summaryBreakdownRow}>
+                    <Text style={styles.summaryBreakdownLabel}>last EMI date</Text>
+                    <Text style={styles.summaryBreakdownValue}>02 sep '26</Text>
+                  </View>
+                  <View style={styles.summaryBreakdownRow}>
+                    <Text style={styles.summaryBreakdownLabel}>duration</Text>
+                    <Text style={styles.summaryBreakdownValue}>24 months</Text>
+                  </View>
+                  
+                  <View style={styles.summaryBreakdownRow}>
+                    <Text style={styles.summaryBreakdownLabel}>total repayment amount</Text>
+                    <Text style={styles.summaryBreakdownValue}>₹1,22,904.34</Text>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.summarySheetFooter}>
+              <Text style={styles.summaryPoweredBy}>powered by</Text>
+              <View style={styles.summaryBankBadge}>
+                <Text style={styles.summaryBankBadgeText}>IDFC FIRST Bank</Text>
+              </View>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Bottom sheet: Loan Documents */}
+      <Modal
+        visible={showLoanDocumentsModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowLoanDocumentsModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowLoanDocumentsModal(false)}
+        >
+          <Pressable style={styles.documentsSheet} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.bottomSheetHandle} />
+            <View style={styles.documentsSheetHeader}>
+              <View style={styles.documentsSheetHeaderIcon}>
+                <Ionicons name="document-text-outline" size={24} color="#666" />
+              </View>
+              <View style={styles.documentsSheetHeaderText}>
+                <Text style={styles.documentsSheetUserName}>Sandeep singh 103680</Text>
+                <Text style={styles.documentsSheetWithdrawal}>₹103,680.00 withdrawal</Text>
+              </View>
+            </View>
+
+            <Text style={styles.documentsSheetTitle}>keep track of your important documents</Text>
+            <Text style={styles.documentsSheetSubtitle}>everything you need, exactly where you need it</Text>
+
+            <View style={styles.documentsList}>
+              {/* Statement of Account */}
+              <View style={styles.documentRow}>
+                <View style={styles.documentRowLeft}>
+                  <Text style={styles.documentRowTitle}>Statement of Account</Text>
+                  <Text style={styles.documentRowDesc}>document generated on 4th feb 26</Text>
+                </View>
+                <View style={styles.documentRowActions}>
+                  <TouchableOpacity style={styles.documentActionBtn} onPress={handleViewStatementPdf}>
+                    <Ionicons name="eye-outline" size={22} color="#333" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.documentActionBtn} onPress={handleDownloadStatementPdf}>
+                    <Ionicons name="download-outline" size={22} color="#333" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.documentActionBtn} onPress={() => {}}>
+                    <Ionicons name="mail-outline" size={22} color="#333" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Loan Agreement */}
+              <View style={styles.documentRow}>
+                <View style={styles.documentRowLeft}>
+                  <Text style={styles.documentRowTitle}>Loan Agreement</Text>
+                </View>
+                <View style={styles.documentRowActions}>
+                  <TouchableOpacity style={styles.documentActionBtn} onPress={() => {}}>
+                    <Ionicons name="eye-outline" size={22} color="#333" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.documentActionBtn} onPress={() => {}}>
+                    <Ionicons name="download-outline" size={22} color="#333" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.documentActionBtn} onPress={() => {}}>
+                    <Ionicons name="mail-outline" size={22} color="#333" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* No Objection Certificate - disabled */}
+              <View style={styles.documentRow}>
+                <View style={styles.documentRowLeft}>
+                  <Text style={styles.documentRowTitle}>No Objection Certificate</Text>
+                  <Text style={styles.documentRowDescMuted}>available once loan is closed</Text>
+                </View>
+                <View style={styles.documentRowActions}>
+                  <View style={styles.documentActionBtnDisabled}>
+                    <Ionicons name="eye-outline" size={22} color="#bbb" />
+                  </View>
+                  <View style={styles.documentActionBtnDisabled}>
+                    <Ionicons name="download-outline" size={22} color="#bbb" />
+                  </View>
+                  <View style={styles.documentActionBtnDisabled}>
+                    <Ionicons name="mail-outline" size={22} color="#bbb" />
+                  </View>
+                </View>
+              </View>
             </View>
           </Pressable>
         </Pressable>
@@ -1127,6 +1403,194 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  // Summary bottom sheet (arrow on loan card)
+  summarySheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 28,
+    maxHeight: '85%',
+  },
+  summarySheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  summarySheetTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    letterSpacing: 0.5,
+  },
+  summarySheetRate: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#00c853',
+  },
+  summarySheetScroll: {
+    maxHeight: 400,
+  },
+  summaryBlock: {
+    marginBottom: 24,
+  },
+  summaryRowMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  summaryBlockTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    textTransform: 'lowercase',
+    flex: 1,
+  },
+  summaryBlockValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  summaryBreakdown: {
+    paddingLeft: 4,
+  },
+  summaryBreakdownRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+  },
+  summaryBreakdownLabel: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  summaryBreakdownRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  summaryBreakdownValue: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+  },
+  summarySheetFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  summaryPoweredBy: {
+    fontSize: 11,
+    color: '#666',
+    marginRight: 8,
+  },
+  summaryBankBadge: {
+    backgroundColor: '#dc143c',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  summaryBankBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  // Loan Documents bottom sheet
+  documentsSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+    maxHeight: '85%',
+  },
+  documentsSheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  documentsSheetHeaderIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  documentsSheetHeaderText: {
+    flex: 1,
+  },
+  documentsSheetUserName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  documentsSheetWithdrawal: {
+    fontSize: 14,
+    color: '#666',
+  },
+  documentsSheetTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  documentsSheetSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  documentsList: {
+    gap: 0,
+  },
+  documentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  documentRowLeft: {
+    flex: 1,
+  },
+  documentRowTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  documentRowDesc: {
+    fontSize: 13,
+    color: '#666',
+  },
+  documentRowDescMuted: {
+    fontSize: 13,
+    color: '#999',
+  },
+  documentRowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  documentActionBtn: {
+    padding: 8,
+  },
+  documentActionBtnDisabled: {
+    padding: 8,
+    opacity: 0.5,
   },
 });
 
