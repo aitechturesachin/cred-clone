@@ -38,10 +38,8 @@ const getStatementPdfUri = async () => {
 // Loan math: EMI 22 of 24, with 2 EMIs overdue → 20 EMIs actually paid
 const LOAN_AMOUNT = 103680;
 const EMI_AMOUNT = 5121;
-const TOTAL_EMIS = 24;
 const CURRENT_EMI = 22;
 const OVERDUE_EMI_COUNT = 2;
-const ANNUAL_RATE = 0.1699;
 const PAID_EMI_COUNT = CURRENT_EMI - OVERDUE_EMI_COUNT; // 20
 
 const formatAmount = (value, decimals = 2) =>
@@ -50,37 +48,16 @@ const formatAmount = (value, decimals = 2) =>
     maximumFractionDigits: decimals,
   });
 
-const getPrincipalLeftAfterPayments = (
-  loanAmount,
-  emiAmount,
-  annualRate,
-  paidCount
-) => {
-  const monthlyRate = annualRate / 12;
-  let balance = loanAmount;
-  for (let i = 0; i < paidCount; i += 1) {
-    const interest = Math.round(balance * monthlyRate * 100) / 100;
-    const principal = Math.min(emiAmount - interest, balance);
-    balance = Math.round((balance - principal) * 100) / 100;
-  }
-  return Math.max(0, balance);
-};
-
 const TOTAL_EMI_PAID = PAID_EMI_COUNT * EMI_AMOUNT; // ₹1,02,420.00
-const PRINCIPAL_LEFT = getPrincipalLeftAfterPayments(
-  LOAN_AMOUNT,
-  EMI_AMOUNT,
-  ANNUAL_RATE,
-  PAID_EMI_COUNT
-); // ₹19,904.25
-const OVERDUE_CHARGES = 10216.75;
-// Overdue pay total = principal left + overdue charges → ₹30,121.00
-const OVERDUE_PAY_AMOUNT = PRINCIPAL_LEFT + OVERDUE_CHARGES;
+// Overdue breakdown (matches EMI Details Pay now)
+const PRINCIPAL_LEFT = 10243; // actual outstanding for 2 overdue EMIs
+const OVERDUE_CHARGES = 19879.75; // late fees on 2 unpaid EMIs
+const OVERDUE_PAY_AMOUNT = 30121; // principal + charges
 // Amount paid shown = total EMI paid − principal left
-const AMOUNT_PAID = TOTAL_EMI_PAID - PRINCIPAL_LEFT; // ₹82,515.75
+const AMOUNT_PAID = TOTAL_EMI_PAID - PRINCIPAL_LEFT;
 const PERCENT_PAID = Math.round(
   ((LOAN_AMOUNT - PRINCIPAL_LEFT) / LOAN_AMOUNT) * 100
-); // 81%
+);
 const DEFAULT_PAY_AMOUNT = formatAmount(OVERDUE_PAY_AMOUNT); // ₹30,121.00
 
 const LoanDetailsScreen = ({ navigation, route }) => {

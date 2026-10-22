@@ -8,13 +8,17 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-// ₹19,904.25 (principal left) + ₹10,216.75 (overdue charges) = ₹30,121.00
-const PRINCIPAL_LEFT = 19904.25;
-const OVERDUE_CHARGES = 10216.75;
-const EMI_PAY_AMOUNT = (PRINCIPAL_LEFT + OVERDUE_CHARGES).toLocaleString(
-  'en-IN',
-  { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-);
+// Principal ₹10,243 + overdue charges ₹19,879.75 → Pay now ₹30,121.00
+const PRINCIPAL_LEFT = 10243;
+const OVERDUE_CHARGES = 19879.75;
+const OVERDUE_EMI_COUNT = 2;
+const EMI_PAY_TOTAL = 30121; // principal + charges (as shown)
+const formatAmount = (value) =>
+  value.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+const EMI_PAY_AMOUNT = formatAmount(EMI_PAY_TOTAL);
 
 const EMIDetailsScreen = ({ navigation }) => {
   return (
@@ -55,11 +59,80 @@ const EMIDetailsScreen = ({ navigation }) => {
 
             {/* Bottom white section */}
             <View style={styles.needsCardBottom}>
+              <Text style={styles.amountLabel}>amount due now</Text>
               <Text style={styles.amount}>₹{EMI_PAY_AMOUNT}</Text>
+
+              {/* Amount breakdown — why this total */}
+              <View style={styles.breakdownBox}>
+                <Text style={styles.breakdownTitle}>WHY THIS AMOUNT?</Text>
+                <Text style={styles.breakdownHint}>
+                  {OVERDUE_EMI_COUNT} EMI(s) overdue · EMI 22 of 24
+                </Text>
+
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelRow}>
+                    <MaterialCommunityIcons
+                      name="cash-plus"
+                      size={16}
+                      color="#2e7d32"
+                    />
+                    <View style={styles.breakdownLabelWrap}>
+                      <Text style={styles.breakdownLabel}>Principal left</Text>
+                      <Text style={styles.breakdownSub}>
+                        actual outstanding loan principal
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.breakdownValueGreen}>
+                    ₹{formatAmount(PRINCIPAL_LEFT)}
+                  </Text>
+                </View>
+
+                <View style={styles.breakdownPlus}>
+                  <Text style={styles.breakdownPlusText}>+</Text>
+                </View>
+
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelRow}>
+                    <Ionicons name="alert-circle" size={16} color="#ff9500" />
+                    <View style={styles.breakdownLabelWrap}>
+                      <Text style={styles.breakdownLabel}>Overdue charges</Text>
+                      <Text style={styles.breakdownSub}>
+                        late fees on {OVERDUE_EMI_COUNT} unpaid EMI(s)
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.breakdownValueOrange}>
+                    ₹{formatAmount(OVERDUE_CHARGES)}
+                  </Text>
+                </View>
+
+                <View style={styles.breakdownDivider} />
+
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelRow}>
+                    <Ionicons name="card-outline" size={16} color="#c62828" />
+                    <View style={styles.breakdownLabelWrap}>
+                      <Text style={styles.breakdownLabelTotal}>
+                        Pay now / total
+                      </Text>
+                      <Text style={styles.breakdownSub}>
+                        principal + charges
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.breakdownTotalBadge}>
+                    <Text style={styles.breakdownTotalValue}>
+                      ₹{EMI_PAY_AMOUNT}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
               <View style={styles.warningRow}>
                 <Ionicons name="warning" size={14} color="#ff6b35" />
                 <Text style={styles.dueTitleOrange}>
-                  pay early to avoid lien up to 30% of your loan amount
+                  pay early to avoid lien up to 40% of your total amount
                 </Text>
               </View>
               <View style={styles.accountRow}>
@@ -120,7 +193,7 @@ const EMIDetailsScreen = ({ navigation }) => {
               <Text style={styles.drawName}>Sandeep singh 103680</Text>
               <View style={styles.monthsLeftRow}>
                 <Ionicons name="time-outline" size={14} color="#666" />
-                <Text style={styles.drawSubtitle}>4 months left</Text>
+                <Text style={styles.drawSubtitle}>2 months EMI left</Text>
               </View>
             </View>
           </View>
@@ -225,11 +298,103 @@ const styles = StyleSheet.create({
     backgroundColor: '#e8e8e8',
     padding: 20,
   },
+  amountLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#888',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
   amount: {
     fontSize: 32,
     fontWeight: '700',
     color: '#1a1a1a',
+    marginBottom: 12,
+  },
+  breakdownBox: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  breakdownTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#666',
+    letterSpacing: 1.2,
     marginBottom: 4,
+  },
+  breakdownHint: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 14,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  breakdownLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    flex: 1,
+    paddingRight: 8,
+  },
+  breakdownLabelWrap: {
+    flex: 1,
+  },
+  breakdownLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  breakdownLabelTotal: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  breakdownSub: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 2,
+  },
+  breakdownValueGreen: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2e7d32',
+  },
+  breakdownValueOrange: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#ff9500',
+  },
+  breakdownPlus: {
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  breakdownPlusText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#999',
+  },
+  breakdownDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 10,
+  },
+  breakdownTotalBadge: {
+    backgroundColor: '#c62828',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  breakdownTotalValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
   },
   accountRow: {
     flexDirection: 'row',

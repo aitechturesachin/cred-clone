@@ -527,11 +527,17 @@ const PaytmLoanScreen = ({ navigation }) => {
     if (item.installmentNumber != null) {
       return (
         <>
-          <Text style={titleStyle}>
-            Installment{' '}
-            <Text style={styles.installmentNumberBold}>{item.installmentNumber}</Text>
-          </Text>
-          <Text style={dateStyle}>{item.date}</Text>
+          <View style={styles.labelWithIcon}>
+            <Ionicons name="layers-outline" size={14} color="#666" />
+            <Text style={titleStyle}>
+              Installment{' '}
+              <Text style={styles.installmentNumberBold}>{item.installmentNumber}</Text>
+            </Text>
+          </View>
+          <View style={styles.labelWithIcon}>
+            <Ionicons name="calendar-outline" size={12} color="#999" />
+            <Text style={dateStyle}>{item.date}</Text>
+          </View>
           <Text style={styles.installmentText}>
             Month{' '}
             <Text style={styles.installmentNumberBold}>{item.month}</Text>
@@ -543,46 +549,78 @@ const PaytmLoanScreen = ({ navigation }) => {
     return (
       <>
         <Text style={titleStyle}>Month {item.month}</Text>
-        <Text style={dateStyle}>{item.date}</Text>
+        <View style={styles.labelWithIcon}>
+          <Ionicons name="calendar-outline" size={12} color="#999" />
+          <Text style={dateStyle}>{item.date}</Text>
+        </View>
       </>
     );
   };
 
+  const renderDetailRow = (icon, iconColor, label, value, labelStyle, valueStyle) => (
+    <View style={styles.repaymentRow}>
+      <View style={styles.repaymentLabelRow}>
+        <Ionicons name={icon} size={14} color={iconColor} />
+        <Text style={labelStyle}>{label}</Text>
+      </View>
+      <Text style={valueStyle}>{value}</Text>
+    </View>
+  );
+
   const renderRepaymentDetails = (item) => (
     <View style={styles.expandableDetails}>
-      {item.installmentNumber != null && (
-        <View style={styles.repaymentRow}>
-          <Text style={styles.repaymentLabel}>Installment</Text>
-          <Text style={styles.repaymentAmountBold}>{item.installmentNumber}</Text>
-        </View>
-      )}
-      {item.installmentNumber != null && item.month != null && (
-        <View style={styles.repaymentRow}>
-          <Text style={styles.repaymentLabel}>Month</Text>
-          <Text style={styles.repaymentAmountBold}>{item.month}</Text>
-        </View>
-      )}
-      {item.emi != null && (
-        <View style={styles.repaymentRow}>
-          <Text style={styles.repaymentLabel}>Automatic Payment</Text>
-          <Text style={styles.repaymentAmount}>{item.emi}</Text>
-        </View>
-      )}
+      {item.installmentNumber != null &&
+        renderDetailRow(
+          'layers-outline',
+          '#666',
+          'Installment',
+          item.installmentNumber,
+          styles.repaymentLabel,
+          styles.repaymentAmountBold
+        )}
+      {item.installmentNumber != null &&
+        item.month != null &&
+        renderDetailRow(
+          'calendar-outline',
+          '#666',
+          'Month',
+          item.month,
+          styles.repaymentLabel,
+          styles.repaymentAmountBold
+        )}
+      {item.emi != null &&
+        renderDetailRow(
+          'flash-outline',
+          '#007aff',
+          'Automatic Payment',
+          item.emi,
+          styles.repaymentLabel,
+          styles.repaymentAmount
+        )}
       {item.charges != null && (
         <View style={[styles.repaymentRow, styles.chargesRow]}>
-          <Text style={styles.chargesLabel}>Charges</Text>
+          <View style={styles.repaymentLabelRow}>
+            <Ionicons name="alert-circle-outline" size={14} color="#e65100" />
+            <Text style={styles.chargesLabel}>Charges</Text>
+          </View>
           <Text style={styles.chargesAmount}>{item.charges}</Text>
         </View>
       )}
       {item.balanceAfterPayment != null && (
         <View style={styles.totalDuesRow}>
-          <Text style={styles.totalDuesLabel}>Balance After Payment</Text>
+          <View style={styles.repaymentLabelRow}>
+            <Ionicons name="wallet-outline" size={14} color="#333" />
+            <Text style={styles.totalDuesLabel}>Balance After Payment</Text>
+          </View>
           <Text style={styles.totalDuesAmount}>{item.balanceAfterPayment}</Text>
         </View>
       )}
       {item.amount != null && item.balanceAfterPayment == null && (
         <View style={styles.totalDuesRow}>
-          <Text style={styles.totalDuesLabel}>Total Dues Remaining</Text>
+          <View style={styles.repaymentLabelRow}>
+            <MaterialCommunityIcons name="cash" size={14} color="#333" />
+            <Text style={styles.totalDuesLabel}>Total Dues Remaining</Text>
+          </View>
           <Text style={styles.totalDuesAmount}>{item.amount}</Text>
         </View>
       )}
@@ -597,15 +635,21 @@ const PaytmLoanScreen = ({ navigation }) => {
           style={[styles.timelineRow, styles.timelineRowComplete]}
         >
           <View style={styles.dotWrap}>
-            <View style={[styles.dot, styles.dotComplete]} />
+            <View style={[styles.dotIcon, styles.dotIconComplete]}>
+              <Ionicons name="trophy" size={12} color="#fff" />
+            </View>
           </View>
           <View style={styles.timelineContent}>
             <View style={styles.timelineRowInner}>
               <View>
                 <Text style={styles.timelineMonthBold}>Month {item.month}</Text>
-                <Text style={styles.timelineDate}>{item.date}</Text>
+                <View style={styles.labelWithIcon}>
+                  <Ionicons name="calendar-outline" size={12} color="#999" />
+                  <Text style={styles.timelineDate}>{item.date}</Text>
+                </View>
               </View>
               <View style={styles.badgeComplete}>
+                <Ionicons name="checkmark-done" size={14} color="#0d9488" />
                 <Text style={styles.badgeCompleteText}>{item.label}</Text>
               </View>
             </View>
@@ -619,12 +663,15 @@ const PaytmLoanScreen = ({ navigation }) => {
         <React.Fragment key={`${item.month}-${index}`}>
           <View style={styles.currentIndicatorWrap}>
             <View style={styles.currentIndicator}>
+              <Ionicons name="locate" size={12} color="#fff" />
               <Text style={styles.currentIndicatorText}>You are here</Text>
             </View>
           </View>
           <View style={[styles.timelineRow, styles.timelineRowCurrent]}>
             <View style={styles.dotWrap}>
-              <View style={[styles.dot, styles.dotCurrent]} />
+              <View style={[styles.dotIcon, styles.dotIconCurrent]}>
+                <Ionicons name="radio-button-on" size={14} color="#007aff" />
+              </View>
             </View>
             <View style={styles.timelineContent}>
               <View style={styles.timelineRowInner}>
@@ -632,12 +679,19 @@ const PaytmLoanScreen = ({ navigation }) => {
                   <Text style={styles.timelineMonthBold}>
                     Month {item.month}
                   </Text>
-                  <Text style={styles.timelineDate}>{item.date}</Text>
+                  <View style={styles.labelWithIcon}>
+                    <Ionicons name="calendar-outline" size={12} color="#999" />
+                    <Text style={styles.timelineDate}>{item.date}</Text>
+                  </View>
                   {item.dueIn ? (
-                    <Text style={styles.dueInText}>{item.dueIn}</Text>
+                    <View style={styles.dueInRow}>
+                      <Ionicons name="time-outline" size={12} color="#d97706" />
+                      <Text style={styles.dueInText}>{item.dueIn}</Text>
+                    </View>
                   ) : null}
                 </View>
                 <View style={styles.badgePending}>
+                  <Ionicons name="hourglass-outline" size={12} color="#d97706" />
                   <Text style={styles.badgePendingText}>
                     {item.amount} pending
                   </Text>
@@ -657,7 +711,9 @@ const PaytmLoanScreen = ({ navigation }) => {
           style={[styles.timelineRow, styles.timelineRowOverdue]}
         >
           <View style={styles.dotWrap}>
-            <View style={[styles.dot, styles.dotPaid]} />
+            <View style={[styles.dotIcon, styles.dotIconOverdue]}>
+              <Ionicons name="alert" size={12} color="#fff" />
+            </View>
           </View>
           <View style={styles.timelineContent}>
             <View style={styles.timelineRowInner}>
@@ -669,13 +725,14 @@ const PaytmLoanScreen = ({ navigation }) => {
                 onPress={() => toggleExpanded(item.month)}
                 activeOpacity={0.8}
               >
+                <Ionicons name="alert-circle" size={14} color="#c62828" />
                 <Text style={styles.badgeOverdueText}>
                   {item.amount} Overdue
                 </Text>
                 <Ionicons
                   name={isExpanded ? "chevron-up" : "chevron-down"}
                   size={14}
-                  color="#666"
+                  color="#c62828"
                 />
               </TouchableOpacity>
             </View>
@@ -690,7 +747,9 @@ const PaytmLoanScreen = ({ navigation }) => {
       return (
         <View key={`${item.month}-${index}`} style={styles.timelineRow}>
           <View style={styles.dotWrap}>
-            <View style={[styles.dot, styles.dotPaid]} />
+            <View style={[styles.dotIcon, styles.dotIconPending]}>
+              <Ionicons name="time" size={12} color="#fff" />
+            </View>
           </View>
           <View style={styles.timelineContent}>
             <View style={styles.timelineRowInner}>
@@ -702,6 +761,7 @@ const PaytmLoanScreen = ({ navigation }) => {
                 onPress={() => toggleExpanded(item.month)}
                 activeOpacity={0.8}
               >
+                <Ionicons name="hourglass-outline" size={12} color="#d97706" />
                 <Text style={styles.badgePendingText}>
                   {item.amount} pending
                 </Text>
@@ -725,7 +785,9 @@ const PaytmLoanScreen = ({ navigation }) => {
       return (
         <View key={`${item.month}-${index}`} style={styles.timelineRow}>
           <View style={styles.dotWrap}>
-            <View style={[styles.dot, styles.dotPaid]} />
+            <View style={[styles.dotIcon, styles.dotIconPaid]}>
+              <Ionicons name="checkmark" size={12} color="#fff" />
+            </View>
           </View>
           <View style={styles.timelineContent}>
             <View style={styles.timelineRowInner}>
@@ -733,6 +795,7 @@ const PaytmLoanScreen = ({ navigation }) => {
                 {renderTimelineLabels(item)}
               </View>
               <View style={styles.badgePaid}>
+                <Ionicons name="checkmark-circle" size={14} color="#00c853" />
                 <Text style={styles.badgePaidText}>{item.amount} paid</Text>
               </View>
             </View>
@@ -750,13 +813,18 @@ const PaytmLoanScreen = ({ navigation }) => {
           style={[styles.timelineRow, styles.timelineRowRestructured]}
         >
           <View style={styles.dotWrap}>
-            <View style={[styles.dot, styles.dotRestructured]} />
+            <View style={[styles.dotIcon, styles.dotIconRestructured]}>
+              <Ionicons name="swap-horizontal" size={12} color="#fff" />
+            </View>
           </View>
           <View style={styles.timelineContent}>
             <View style={styles.timelineRowInner}>
               <View>
                 <Text style={styles.timelineMonthBold}>Month {item.month}</Text>
-                <Text style={styles.timelineDate}>{item.date}</Text>
+                <View style={styles.labelWithIcon}>
+                  <Ionicons name="calendar-outline" size={12} color="#999" />
+                  <Text style={styles.timelineDate}>{item.date}</Text>
+                </View>
               </View>
               {canExpand ? (
                 <TouchableOpacity
@@ -764,6 +832,7 @@ const PaytmLoanScreen = ({ navigation }) => {
                   onPress={() => toggleExpanded(item.month)}
                   activeOpacity={0.8}
                 >
+                  <Ionicons name="swap-horizontal" size={14} color="#7CB518" />
                   <Text style={styles.badgeRestructuredText}>
                     {item.amount} restructured
                   </Text>
@@ -775,6 +844,7 @@ const PaytmLoanScreen = ({ navigation }) => {
                 </TouchableOpacity>
               ) : (
                 <View style={styles.badgeRestructured}>
+                  <Ionicons name="swap-horizontal" size={14} color="#7CB518" />
                   <Text style={styles.badgeRestructuredText}>
                     {item.amount} restructured
                   </Text>
@@ -839,9 +909,12 @@ const PaytmLoanScreen = ({ navigation }) => {
               <Ionicons name="checkmark-circle" size={22} color="#00c853" />
               <View>
                 <Text style={styles.statusTitle}>Total Dues Paid</Text>
-                <Text style={styles.statusSubtitle}>
-                  Next due on 2nd Apr 2026
-                </Text>
+                <View style={styles.statusSubtitleRow}>
+                  <Ionicons name="calendar-outline" size={12} color="#666" />
+                  <Text style={styles.statusSubtitle}>
+                    Next due on 2nd Apr 2026
+                  </Text>
+                </View>
               </View>
             </View>
             <TouchableOpacity
@@ -856,7 +929,7 @@ const PaytmLoanScreen = ({ navigation }) => {
           <View style={styles.uploadCard}>
             <View style={styles.uploadLeft}>
               <View style={styles.uploadIconWrap}>
-                <Ionicons name="add" size={22} color="#007aff" />
+                <Ionicons name="cloud-upload-outline" size={22} color="#007aff" />
               </View>
               <View>
                 <Text style={styles.uploadTitle}>Upload Business Proof</Text>
@@ -866,6 +939,7 @@ const PaytmLoanScreen = ({ navigation }) => {
               </View>
             </View>
             <TouchableOpacity style={styles.uploadButton} activeOpacity={0.8}>
+              <Ionicons name="arrow-up-circle-outline" size={16} color="#007aff" />
               <Text style={styles.uploadButtonText}>Upload Now</Text>
             </TouchableOpacity>
           </View>
@@ -884,11 +958,15 @@ const PaytmLoanScreen = ({ navigation }) => {
                 <Text style={styles.legendText}>Paid</Text>
               </View>
               <View style={styles.legendItem}>
+                <Ionicons name="hourglass-outline" size={12} color="#d97706" />
+                <Text style={styles.legendText}>Pending</Text>
+              </View>
+              <View style={styles.legendItem}>
                 <Ionicons name="alert-circle" size={12} color="#c62828" />
                 <Text style={styles.legendText}>Overdue</Text>
               </View>
               <View style={styles.legendItem}>
-                <Ionicons name="swap-horizontal" size={12} color="#ff9800" />
+                <Ionicons name="swap-horizontal" size={12} color="#7CB518" />
                 <Text style={styles.legendText}>Restructured</Text>
               </View>
             </View>
@@ -900,7 +978,10 @@ const PaytmLoanScreen = ({ navigation }) => {
           </View>
           <View style={styles.timelineFooter}>
             <View style={styles.footerLine} />
-            <Text style={styles.footerText}>Previous payments continue...</Text>
+            <View style={styles.footerTextRow}>
+              <Ionicons name="ellipsis-horizontal" size={14} color="#999" />
+              <Text style={styles.footerText}>Previous payments continue...</Text>
+            </View>
             <View style={styles.footerLine} />
           </View>
         </View>
@@ -1033,6 +1114,12 @@ const styles = StyleSheet.create({
     color: "#333",
     fontSize: 14,
   },
+  statusSubtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
   statusSubtitle: {
     fontSize: 12,
     color: "#666",
@@ -1095,6 +1182,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   uploadButtonText: {
     color: "#007aff",
@@ -1189,6 +1279,56 @@ const styles = StyleSheet.create({
     marginRight: 24,
     marginTop: 2,
   },
+  dotIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  dotIconComplete: {
+    backgroundColor: "#0d9488",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+  },
+  dotIconCurrent: {
+    backgroundColor: "#e8f4ff",
+    borderColor: "#007aff",
+  },
+  dotIconOverdue: {
+    backgroundColor: "#c62828",
+  },
+  dotIconPending: {
+    backgroundColor: "#d97706",
+  },
+  dotIconPaid: {
+    backgroundColor: "#34c759",
+  },
+  dotIconRestructured: {
+    backgroundColor: "#7CB518",
+  },
+  labelWithIcon: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  dueInRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  repaymentLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flex: 1,
+    paddingRight: 8,
+  },
   dot: {
     width: 16,
     height: 16,
@@ -1272,21 +1412,27 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   badgeComplete: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     backgroundColor: "rgba(16, 185, 129, 0.15)",
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(16, 185, 129, 0.3)",
+    maxWidth: "55%",
   },
   badgeCompleteText: {
     fontWeight: "700",
     color: "#059669",
-    fontSize: 14,
+    fontSize: 12,
+    flexShrink: 1,
   },
   badgePending: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
     backgroundColor: "#fff7ed",
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -1300,6 +1446,7 @@ const styles = StyleSheet.create({
   badgeOverdue: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
     backgroundColor: "rgba(220, 38, 38, 0.15)",
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -1309,9 +1456,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#dc2626",
     fontSize: 16,
-    marginRight: 8,
   },
   badgePaid: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     backgroundColor: "rgba(16, 185, 129, 0.1)",
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -1325,6 +1474,7 @@ const styles = StyleSheet.create({
   badgeRestructured: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
     backgroundColor: "rgba(198, 232, 74, 0.35)",
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -1334,7 +1484,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#7CB518",
     fontSize: 16,
-    marginRight: 8,
   },
   currentIndicatorWrap: {
     marginBottom: 8,
@@ -1345,6 +1494,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   currentIndicatorText: {
     color: "#fff",
@@ -1424,6 +1576,11 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "#e5e7eb",
     marginVertical: 10,
+  },
+  footerTextRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   footerText: {
     color: "#9ca3af",
