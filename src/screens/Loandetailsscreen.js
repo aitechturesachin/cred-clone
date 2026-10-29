@@ -49,16 +49,19 @@ const formatAmount = (value, decimals = 2) =>
   });
 
 const TOTAL_EMI_PAID = PAID_EMI_COUNT * EMI_AMOUNT; // ₹1,02,420.00
-// Overdue breakdown (matches EMI Details Pay now)
-const PRINCIPAL_LEFT = 10243; // actual outstanding for 2 overdue EMIs
-const OVERDUE_CHARGES = 19879.75; // late fees on 2 unpaid EMIs
-const OVERDUE_PAY_AMOUNT = 30121; // principal + charges
+// CRED CASH one-time settlement (matches EMI Details)
+const PRINCIPAL_LEFT = 10243;
+const OVERDUE_CHARGES = 19879.75;
+const WAIVER_AMOUNT = 9939.88; // 50% waiver
+const REMAINING_CHARGES = 9939.88;
+const OVERDUE_PAY_AMOUNT = 20182.88; // final settlement
+const OFFER_DEADLINE = '02 Nov 2026';
 // Amount paid shown = total EMI paid − principal left
 const AMOUNT_PAID = TOTAL_EMI_PAID - PRINCIPAL_LEFT;
 const PERCENT_PAID = Math.round(
   ((LOAN_AMOUNT - PRINCIPAL_LEFT) / LOAN_AMOUNT) * 100
 );
-const DEFAULT_PAY_AMOUNT = formatAmount(OVERDUE_PAY_AMOUNT); // ₹30,121.00
+const DEFAULT_PAY_AMOUNT = formatAmount(OVERDUE_PAY_AMOUNT); // ₹20,182.88
 
 const LoanDetailsScreen = ({ navigation, route }) => {
   const [showRepaymentModal, setShowRepaymentModal] = useState(false);
@@ -282,10 +285,28 @@ const LoanDetailsScreen = ({ navigation, route }) => {
                 ₹{formatAmount(OVERDUE_CHARGES)}
               </Text>
             </View>
+            <View style={styles.paymentRow}>
+              <View style={styles.paymentLabelRow}>
+                <Ionicons name="pricetag" size={16} color="#00ff88" />
+                <Text style={styles.paymentLabel}>50% waiver</Text>
+              </View>
+              <Text style={[styles.paymentValue, styles.paymentValueGreen]}>
+                −₹{formatAmount(WAIVER_AMOUNT)}
+              </Text>
+            </View>
+            <View style={styles.paymentRow}>
+              <View style={styles.paymentLabelRow}>
+                <Ionicons name="receipt-outline" size={16} color="#ff9500" />
+                <Text style={styles.paymentLabel}>remaining charges</Text>
+              </View>
+              <Text style={[styles.paymentValue, styles.paymentValueOrange]}>
+                ₹{formatAmount(REMAINING_CHARGES)}
+              </Text>
+            </View>
             <View style={[styles.paymentRow, styles.paymentRowTotal]}>
               <View style={styles.paymentLabelRow}>
                 <Ionicons name="card-outline" size={18} color="#fff" />
-                <Text style={styles.paymentLabelTotal}>Pay now / total</Text>
+                <Text style={styles.paymentLabelTotal}>Final settlement</Text>
               </View>
               <View style={styles.paymentValueTotalBadge}>
                 <Ionicons name="flash" size={16} color="#fff" style={{ marginRight: 4 }} />
@@ -293,6 +314,13 @@ const LoanDetailsScreen = ({ navigation, route }) => {
                   ₹{formatAmount(OVERDUE_PAY_AMOUNT)}
                 </Text>
               </View>
+            </View>
+            <View style={styles.settlementNoteRow}>
+              <Ionicons name="warning" size={14} color="#ff6b35" />
+              <Text style={styles.settlementNoteText}>
+                Final offer — pay before {OFFER_DEADLINE} to avoid a lined up
+                account
+              </Text>
             </View>
           </View>
         </View>
@@ -1070,6 +1098,22 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     color: '#fff',
+  },
+  settlementNoteRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginTop: 12,
+    padding: 10,
+    backgroundColor: 'rgba(255, 107, 53, 0.12)',
+    borderRadius: 8,
+  },
+  settlementNoteText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#ff6b35',
+    lineHeight: 17,
+    fontWeight: '500',
   },
   payNowCard: {
     backgroundColor: '#e8e8e8',

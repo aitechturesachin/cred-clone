@@ -8,17 +8,21 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-// Principal ₹10,243 + overdue charges ₹19,879.75 → Pay now ₹30,121.00
+// CRED CASH one-time settlement (50% waiver on overdue charges)
 const PRINCIPAL_LEFT = 10243;
 const OVERDUE_CHARGES = 19879.75;
+const WAIVER_PERCENT = 50;
+const WAIVER_AMOUNT = 9939.88; // 50% of overdue charges
+const REMAINING_CHARGES = 9939.88;
+const SETTLEMENT_TOTAL = 20182.88; // principal + remaining charges
 const OVERDUE_EMI_COUNT = 2;
-const EMI_PAY_TOTAL = 30121; // principal + charges (as shown)
+const OFFER_DEADLINE = "02 Nov 2026";
 const formatAmount = (value) =>
   value.toLocaleString('en-IN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-const EMI_PAY_AMOUNT = formatAmount(EMI_PAY_TOTAL);
+const EMI_PAY_AMOUNT = formatAmount(SETTLEMENT_TOTAL);
 
 const EMIDetailsScreen = ({ navigation }) => {
   return (
@@ -59,12 +63,18 @@ const EMIDetailsScreen = ({ navigation }) => {
 
             {/* Bottom white section */}
             <View style={styles.needsCardBottom}>
-              <Text style={styles.amountLabel}>amount due now</Text>
+              <View style={styles.offerBadge}>
+                <Ionicons name="gift-outline" size={14} color="#fff" />
+                <Text style={styles.offerBadgeText}>
+                  SPECIAL ONE-TIME SETTLEMENT · {WAIVER_PERCENT}% WAIVER
+                </Text>
+              </View>
+              <Text style={styles.amountLabel}>final settlement amount</Text>
               <Text style={styles.amount}>₹{EMI_PAY_AMOUNT}</Text>
 
-              {/* Amount breakdown — why this total */}
+              {/* Settlement calculation breakdown */}
               <View style={styles.breakdownBox}>
-                <Text style={styles.breakdownTitle}>WHY THIS AMOUNT?</Text>
+                <Text style={styles.breakdownTitle}>SETTLEMENT BREAKDOWN</Text>
                 <Text style={styles.breakdownHint}>
                   {OVERDUE_EMI_COUNT} EMI(s) overdue · EMI 22 of 24
                 </Text>
@@ -77,7 +87,9 @@ const EMIDetailsScreen = ({ navigation }) => {
                       color="#2e7d32"
                     />
                     <View style={styles.breakdownLabelWrap}>
-                      <Text style={styles.breakdownLabel}>Principal left</Text>
+                      <Text style={styles.breakdownLabel}>
+                        Principal outstanding
+                      </Text>
                       <Text style={styles.breakdownSub}>
                         actual outstanding loan principal
                       </Text>
@@ -107,6 +119,48 @@ const EMIDetailsScreen = ({ navigation }) => {
                   </Text>
                 </View>
 
+                <View style={styles.breakdownPlus}>
+                  <Text style={styles.breakdownPlusText}>−</Text>
+                </View>
+
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelRow}>
+                    <Ionicons name="pricetag" size={16} color="#2e7d32" />
+                    <View style={styles.breakdownLabelWrap}>
+                      <Text style={styles.breakdownLabel}>
+                        {WAIVER_PERCENT}% waiver on overdue charges
+                      </Text>
+                      <Text style={styles.breakdownSub}>
+                        special one-time settlement offer
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.breakdownValueGreen}>
+                    −₹{formatAmount(WAIVER_AMOUNT)}
+                  </Text>
+                </View>
+
+                <View style={styles.breakdownPlus}>
+                  <Text style={styles.breakdownPlusText}>=</Text>
+                </View>
+
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelRow}>
+                    <Ionicons name="receipt-outline" size={16} color="#ff9500" />
+                    <View style={styles.breakdownLabelWrap}>
+                      <Text style={styles.breakdownLabel}>
+                        Remaining overdue charges
+                      </Text>
+                      <Text style={styles.breakdownSub}>
+                        after {WAIVER_PERCENT}% waiver
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.breakdownValueOrange}>
+                    ₹{formatAmount(REMAINING_CHARGES)}
+                  </Text>
+                </View>
+
                 <View style={styles.breakdownDivider} />
 
                 <View style={styles.breakdownRow}>
@@ -114,10 +168,10 @@ const EMIDetailsScreen = ({ navigation }) => {
                     <Ionicons name="card-outline" size={16} color="#c62828" />
                     <View style={styles.breakdownLabelWrap}>
                       <Text style={styles.breakdownLabelTotal}>
-                        Pay now / total
+                        Total final settlement
                       </Text>
                       <Text style={styles.breakdownSub}>
-                        principal + charges
+                        principal + remaining charges
                       </Text>
                     </View>
                   </View>
@@ -129,10 +183,20 @@ const EMIDetailsScreen = ({ navigation }) => {
                 </View>
               </View>
 
+              <View style={styles.finalOfferBox}>
+                <Ionicons name="warning" size={18} color="#c62828" />
+                <Text style={styles.finalOfferText}>
+                  This is the final and last offer. Pay before{' '}
+                  <Text style={styles.finalOfferDate}>{OFFER_DEADLINE}</Text> to
+                  avoid a lined up account.
+                </Text>
+              </View>
+
               <View style={styles.warningRow}>
-                <Ionicons name="warning" size={14} color="#ff6b35" />
+                <Ionicons name="alert-circle" size={14} color="#ff6b35" />
                 <Text style={styles.dueTitleOrange}>
-                  pay early to avoid lien up to 40% of your total amount
+                  clear ₹{EMI_PAY_AMOUNT} via CRED app to close your account
+                  successfully
                 </Text>
               </View>
               <View style={styles.accountRow}>
@@ -298,6 +362,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#e8e8e8',
     padding: 20,
   },
+  offerBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#2e7d32',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  offerBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
   amountLabel: {
     fontSize: 11,
     fontWeight: '600',
@@ -310,6 +391,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1a1a1a',
     marginBottom: 12,
+  },
+  finalOfferBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: '#ffebee',
+    borderWidth: 1,
+    borderColor: '#ef9a9a',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  finalOfferText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#b71c1c',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  finalOfferDate: {
+    fontWeight: '800',
+    textDecorationLine: 'underline',
   },
   breakdownBox: {
     backgroundColor: '#fff',
