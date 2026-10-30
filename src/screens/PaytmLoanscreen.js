@@ -374,9 +374,15 @@ const TIMELINE_DATA = [
     month: 18,
     date: "2nd Jul 2026",
     type: "overdue",
-    amount: "₹21,869.49",
-    charges: "₹10,480.00",
+    amount: "₹21,949.49",
+    totalDues: "₹17,197.49",
+    charges: "₹10,560.00",
     emi: "₹11,389.49",
+    waiver: {
+      rate: "45%",
+      amount: "₹4,752.00",
+      info: "Pay immediately before this offer expires. Last date: 10 Nov 2026",
+    },
   },
 
   {
@@ -606,6 +612,25 @@ const PaytmLoanScreen = ({ navigation }) => {
           <Text style={styles.chargesAmount}>{item.charges}</Text>
         </View>
       )}
+      {item.waiver != null && (
+        <View style={styles.waiverBlock}>
+          <View style={[styles.repaymentRow, styles.waiverRow]}>
+            <View style={styles.repaymentLabelRow}>
+              <Ionicons name="pricetag-outline" size={14} color="#047857" />
+              <Text style={styles.waiverLabel}>
+                Charges Waiver ({item.waiver.rate})
+              </Text>
+            </View>
+            <Text style={styles.waiverAmount}>-{item.waiver.amount}</Text>
+          </View>
+          {item.waiver.info != null && (
+            <View style={styles.waiverInfoRow}>
+              <Ionicons name="information-circle-outline" size={13} color="#b45309" />
+              <Text style={styles.waiverInfoText}>{item.waiver.info}</Text>
+            </View>
+          )}
+        </View>
+      )}
       {item.balanceAfterPayment != null && (
         <View style={styles.totalDuesRow}>
           <View style={styles.repaymentLabelRow}>
@@ -615,13 +640,16 @@ const PaytmLoanScreen = ({ navigation }) => {
           <Text style={styles.totalDuesAmount}>{item.balanceAfterPayment}</Text>
         </View>
       )}
-      {item.amount != null && item.balanceAfterPayment == null && (
+      {(item.totalDues != null || item.amount != null) &&
+        item.balanceAfterPayment == null && (
         <View style={styles.totalDuesRow}>
           <View style={styles.repaymentLabelRow}>
             <MaterialCommunityIcons name="cash" size={14} color="#333" />
             <Text style={styles.totalDuesLabel}>Total Dues Remaining</Text>
           </View>
-          <Text style={styles.totalDuesAmount}>{item.amount}</Text>
+          <Text style={styles.totalDuesAmount}>
+            {item.totalDues ?? item.amount}
+          </Text>
         </View>
       )}
     </View>
@@ -1546,6 +1574,38 @@ const styles = StyleSheet.create({
   chargesAmount: {
     fontWeight: "600",
     color: "#dc2626",
+  },
+  waiverBlock: {
+    marginBottom: 10,
+  },
+  waiverRow: {
+    backgroundColor: "rgba(16, 185, 129, 0.12)",
+    borderLeftWidth: 0,
+    marginBottom: 0,
+  },
+  waiverLabel: {
+    color: "#047857",
+    fontSize: 14,
+  },
+  waiverAmount: {
+    fontWeight: "600",
+    color: "#047857",
+  },
+  waiverInfoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    marginTop: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "#fff7ed",
+    borderRadius: 6,
+  },
+  waiverInfoText: {
+    flex: 1,
+    color: "#b45309",
+    fontSize: 12,
+    lineHeight: 16,
   },
   totalDuesRow: {
     flexDirection: "row",
