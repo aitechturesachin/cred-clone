@@ -1,20 +1,21 @@
 {
   "expo": {
-    "name": "cred-clone",
-    "slug": "cred-clone",
+    "name": "aitechturesachin",
+    "slug": "aitechturesachin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aitechturesachinsteam.aitechturesachin"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.sachin407.credclone"
+      "package": "com.aitechturesachinsteam.aitechturesachin"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -24,7 +25,7 @@
         "projectId": "c22b8372-5b2a-41ff-b0fe-52a64cfbe92c"
       }
     },
-    "owner": "aitechuresachin",
+    "owner": "aitechturesachins-team",
     "plugins": [
       "expo-asset",
       "expo-font",
