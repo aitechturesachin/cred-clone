@@ -21,10 +21,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "995a3028-371f-411c-8d79-15da866e1279"
+        "projectId": "c22b8372-5b2a-41ff-b0fe-52a64cfbe92c"
       }
     },
-    "owner": "sachin407",
+    "owner": "aitechuresachin",
     "plugins": [
       "expo-asset",
       "expo-font",
